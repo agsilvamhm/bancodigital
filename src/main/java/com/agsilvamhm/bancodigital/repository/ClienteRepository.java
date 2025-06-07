@@ -1,4 +1,7 @@
 package com.agsilvamhm.bancodigital.repository;
 
-public interface ClienteRepository {
+import com.agsilvamhm.bancodigital.model.Cliente;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ClienteRepository extends JpaRepository<Cliente, String> {
 }

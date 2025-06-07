@@ -1,4 +1,7 @@
 package com.agsilvamhm.bancodigital.repository;
 
-public interface CartaoCreditoRepository {
+import com.agsilvamhm.bancodigital.model.CartaoCredito;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CartaoCreditoRepository  extends JpaRepository<CartaoCredito, Long> {
 }

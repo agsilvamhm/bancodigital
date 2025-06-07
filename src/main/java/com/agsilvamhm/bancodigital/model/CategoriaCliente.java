@@ -1,4 +1,5 @@
 package com.agsilvamhm.bancodigital.model;
 
-public class CategoriaCliente {
+public enum CategoriaCliente {
+    COMUM, SUPER, PREMIUM;
 }

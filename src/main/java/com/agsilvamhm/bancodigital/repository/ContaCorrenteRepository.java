@@ -1,4 +1,7 @@
 package com.agsilvamhm.bancodigital.repository;
 
-public interface ContaCorrenteRepository {
+import com.agsilvamhm.bancodigital.model.ContaCorrente;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ContaCorrenteRepository  extends JpaRepository<ContaCorrente, Long> {
 }
