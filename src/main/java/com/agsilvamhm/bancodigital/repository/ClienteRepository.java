@@ -3,5 +3,8 @@ package com.agsilvamhm.bancodigital.repository;
 import com.agsilvamhm.bancodigital.model.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ClienteRepository extends JpaRepository<Cliente, String> {
+import java.util.Optional;
+
+public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
+    Optional<Cliente> findById(Integer id);
 }
