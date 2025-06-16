@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.controller;
+package com.agsilvamhm.bancodigital.autenticacao.controller;
 
 import com.agsilvamhm.bancodigital.autenticacao.model.Role;
 import com.agsilvamhm.bancodigital.autenticacao.model.Tweet;
@@ -68,6 +68,4 @@ public class TweetController {
         return ResponseEntity.ok(new FeedDto(tweets.getContent(),
                 page, pageSize, tweets.getTotalPages(), tweets.getTotalElements()));
     }
-
-
 }

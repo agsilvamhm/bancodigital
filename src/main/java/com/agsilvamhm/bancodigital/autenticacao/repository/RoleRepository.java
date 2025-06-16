@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.repository;
+package com.agsilvamhm.bancodigital.autenticacao.repository;
 
 import com.agsilvamhm.bancodigital.autenticacao.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;

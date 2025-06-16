@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.config;
+package com.agsilvamhm.bancodigital.autenticacao.config;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -41,18 +41,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
                 .authorizeHttpRequests(authirize -> authirize
-                        .requestMatchers("/").permitAll() // Sua homepage
-                        // 1. Regra para H2 Console (usando PathRequest.toH2Console() é mais robusto)
-                        .requestMatchers(toH2Console()).permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        // 2. Regras para Swagger UI
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .anyRequest().authenticated())
+                .requestMatchers("/").permitAll() // Sua homepage
+                .requestMatchers(toH2Console()).permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
-            //    .csrf(csrf -> csrf.ignoringRequestMatchers(toH2Console))
                 .headers(headers -> headers.frameOptions((frameOptions -> frameOptions.sameOrigin())))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -75,6 +72,4 @@ public class SecurityConfig {
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
     }
-
-
 }

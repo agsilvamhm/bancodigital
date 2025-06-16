@@ -1,8 +1,7 @@
-package com.agsilvamhm.bancodigital.model;
+package com.agsilvamhm.bancodigital.autenticacao.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.boot.autoconfigure.web.WebProperties;
 
 import java.time.Instant;
 

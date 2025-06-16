@@ -8,17 +8,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SwaggerConfig { // Pode renomear para OpenApiConfig se preferir
+public class SwaggerConfig {
 
     @Bean
     public OpenAPI springShopOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("Título - Rest API")
+                .info(new Info().title("Projeto Formacão CDB - EDU360")
                         .description("Documentação da API do Banco Digital")
                         .version("v1.0.0")
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")))
                 .externalDocs(new ExternalDocumentation()
-                        .description("GitHub do Autor")
+                        .description("Site pessoal do Autor")
                         .url("https://agsilvamhm.github.io"));
     }
 }

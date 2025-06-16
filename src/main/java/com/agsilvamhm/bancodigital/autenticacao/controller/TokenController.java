@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.controller;
+package com.agsilvamhm.bancodigital.autenticacao.controller;
 
 import com.agsilvamhm.bancodigital.autenticacao.model.Role;
 import com.agsilvamhm.bancodigital.autenticacao.model.dto.LoginRequest;
@@ -42,7 +42,7 @@ public class TokenController {
         }
 
         var now = Instant.now();
-        var expiresIn = 3000L;
+        var expiresIn = 300L;
 
         var scopes = user.get().getRoles()
                 .stream()

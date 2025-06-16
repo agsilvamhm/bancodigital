@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.controller;
+package com.agsilvamhm.bancodigital.autenticacao.controller;
 
 import com.agsilvamhm.bancodigital.autenticacao.model.Role;
 import com.agsilvamhm.bancodigital.autenticacao.model.User;
@@ -29,15 +29,6 @@ public class UserController {
     private RoleRepository roleRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
-
-   /*
-    public UserController(UserRepository userRepository,
-                          RoleRepository roleRepository,
-                          BCryptPasswordEncoder passwordEncoder){
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-    } */
 
     @Transactional
     @PostMapping("/users")

@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.model.dto;
+package com.agsilvamhm.bancodigital.autenticacao.model.dto;
 
 import java.util.List;
 

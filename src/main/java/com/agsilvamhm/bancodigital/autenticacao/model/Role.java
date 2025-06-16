@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.model;
+package com.agsilvamhm.bancodigital.autenticacao.model;
 
 import jakarta.persistence.*;
 
