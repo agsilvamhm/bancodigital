@@ -1,4 +1,4 @@
 package com.agsilvamhm.bancodigital.model.dto;
 
-public record CreateUserDto() {
+public record CreateTweetDto(String content) {
 }
