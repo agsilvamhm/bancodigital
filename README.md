@@ -34,7 +34,7 @@ classDiagram
   }
   
 
-  User "1" *-- "1" Role
+  User "1" *-- "1..N" Role
   
 ```
 
