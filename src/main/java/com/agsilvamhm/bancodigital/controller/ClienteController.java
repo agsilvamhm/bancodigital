@@ -1,20 +1,20 @@
 package com.agsilvamhm.bancodigital.controller;
 
-import com.agsilvamhm.bancodigital.model.Cliente;
-import com.agsilvamhm.bancodigital.model.dto.ClienteDto;
+import com.agsilvamhm.bancodigital.entity.Cliente;
+import com.agsilvamhm.bancodigital.entity.dto.ClienteDto;
 import com.agsilvamhm.bancodigital.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value="/clientes")
+@RequestMapping(value="/api/v1/clientes")
 public class ClienteController {
 
     @Autowired
     private ClienteService clienteService;
 
-    @PostMapping("/adicionar")
+    @PostMapping("/add")
     public ResponseEntity<Void> newCliente(@RequestBody ClienteDto dto){
 
         return ResponseEntity.ok().build();
@@ -36,11 +36,9 @@ public class ClienteController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/lista")
+    @GetMapping("/listar")
     public ResponseEntity<Cliente> getClienteAll() {
       //  Cliente cliente = clienteService.findByAll();
         return ResponseEntity.ok().build();
     }
-
-
 }

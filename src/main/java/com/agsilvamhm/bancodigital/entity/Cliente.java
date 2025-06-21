@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.model;
+package com.agsilvamhm.bancodigital.entity;
 
 import jakarta.persistence.*;
 
@@ -10,7 +10,7 @@ public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(length = 11, nullable = false)
+    @Column(length = 11, nullable = false, unique=true)
     private String cpf;
     private String nome;
     private LocalDate dataNascimento;
@@ -61,12 +61,4 @@ public class Cliente {
         return contas;
     }
 
-    @Override
-    public String toString() {
-        return "Cliente{" +
-                "id=" + id +
-                ", cpf='" + cpf + '\'' +
-                ", nome='" + nome + '\'' +
-                '}';
-    }
 }

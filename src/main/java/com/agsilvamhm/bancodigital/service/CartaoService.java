@@ -1,6 +1,6 @@
 package com.agsilvamhm.bancodigital.service;
 
-import com.agsilvamhm.bancodigital.model.Cartao;
+import com.agsilvamhm.bancodigital.entity.Cartao;
 import com.agsilvamhm.bancodigital.repository.CartaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -1,6 +1,6 @@
 package com.agsilvamhm.bancodigital.repository;
 
-import com.agsilvamhm.bancodigital.model.Cliente;
+import com.agsilvamhm.bancodigital.entity.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
