@@ -17,9 +17,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
-@RestController
+//@RestController
 public class TweetController {
-    private final TweetRepository tweetRepository;
+   /* private final TweetRepository tweetRepository;
     private final UserRepository userRepository;
 
     public TweetController(TweetRepository tweetRepository,
@@ -67,5 +67,5 @@ public class TweetController {
 
         return ResponseEntity.ok(new FeedDto(tweets.getContent(),
                 page, pageSize, tweets.getTotalPages(), tweets.getTotalElements()));
-    }
+    } */
 }
