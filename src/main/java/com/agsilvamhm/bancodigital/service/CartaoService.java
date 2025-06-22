@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Optional;
 
 public class CartaoService {
-    @Autowired
+  /*  @Autowired
     private CartaoRepository cartaoRepository;
 
     public Cartao ativarCartao(Long id) {
@@ -17,5 +17,5 @@ public class CartaoService {
             cartaoRepository.save(c);
         });
         return cartao.orElse(null);
-    }
+    }*/
 }

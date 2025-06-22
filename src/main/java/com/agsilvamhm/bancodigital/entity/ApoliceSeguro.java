@@ -8,15 +8,15 @@ import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Entity
+//@Entity
 public class ApoliceSeguro {
-    @Id
-    @GeneratedValue
+ //   @Id
+ //   @GeneratedValue
     private Long numero;
     private LocalDate dataContratacao;
     private BigDecimal valor;
     private String descricao;
-    @ManyToOne
+  //  @ManyToOne
     private CartaoCredito cartao;
 
 }

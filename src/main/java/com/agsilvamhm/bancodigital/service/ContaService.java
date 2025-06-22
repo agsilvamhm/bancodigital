@@ -5,7 +5,7 @@ import com.agsilvamhm.bancodigital.repository.ContaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ContaService {
-    @Autowired
+  /*  @Autowired
     private ContaRepository contaRepository;
 
     public Conta criarConta(Conta conta) {
@@ -14,5 +14,5 @@ public class ContaService {
 
     public void aplicarTaxasOuRendimentosMensais() {
       //  contaRepository.findAll().forEach(Conta::aplicarTaxasOuRendimentos);
-    }
+    } */
 }

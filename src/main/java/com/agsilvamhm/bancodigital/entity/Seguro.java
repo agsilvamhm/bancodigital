@@ -7,17 +7,17 @@ import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDate;
 
-@Entity
+//@Entity
 public class Seguro {
-    @Id
-    @GeneratedValue
+  //  @Id
+  //  @GeneratedValue
     private Long id;
 
     private String tipo;
     private double valor;
     private String descricao;
 
-    @ManyToOne
+   // @ManyToOne
     private CartaoCredito cartao;
 
     private String numeroApolice;

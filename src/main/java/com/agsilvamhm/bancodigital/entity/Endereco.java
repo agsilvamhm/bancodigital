@@ -2,7 +2,7 @@ package com.agsilvamhm.bancodigital.entity;
 
 import jakarta.persistence.Embeddable;
 
-@Embeddable
+//@Embeddable
 public class Endereco {
     private String rua;
     private String numero;

@@ -4,6 +4,9 @@ import com.agsilvamhm.bancodigital.autenticacao.model.Role;
 import com.agsilvamhm.bancodigital.autenticacao.model.dto.LoginRequest;
 import com.agsilvamhm.bancodigital.autenticacao.model.dto.LoginResponse;
 import com.agsilvamhm.bancodigital.autenticacao.repository.UserRepository;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,6 +21,7 @@ import java.time.Instant;
 import java.util.stream.Collectors;
 
 @RestController
+@Tag(name = "Usuários Controller", description = "RESTful API para controle de usuários.")
 public class TokenController {
 
     private final JwtEncoder jwtEncoder;
@@ -34,6 +38,9 @@ public class TokenController {
     }
 
     @PostMapping("/login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Operação bem sucedida"),
+            @ApiResponse(responseCode = "401", description = "Autorização não permitida")})
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
         var user = userRepository.findByUsername(loginRequest.username());
 
@@ -60,5 +67,4 @@ public class TokenController {
 
         return ResponseEntity.ok(new LoginResponse(jwtValue, expiresIn));
     }
-
 }

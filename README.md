@@ -41,5 +41,12 @@ classDiagram
 https://www.youtube.com/watch?v=nDst-CRKt_k  
 
 
-
-
+## Exemplo de fluxo no mermaid
+```mermaid
+graph TD
+A[Início] --> B{Decisão?};
+B -- Sim --> C[Ação 1];
+B -- Não --> D[Ação 2];
+C --> E[Fim];
+D --> E;
+```

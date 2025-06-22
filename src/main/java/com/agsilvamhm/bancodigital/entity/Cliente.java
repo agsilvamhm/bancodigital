@@ -1,25 +1,24 @@
 package com.agsilvamhm.bancodigital.entity;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.util.List;
 
-@Entity
 public class Cliente {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(length = 11, nullable = false, unique=true)
     private String cpf;
     private String nome;
     private LocalDate dataNascimento;
-    @Embedded
     private Endereco endereco;
-    @Enumerated(EnumType.STRING)
     private CategoriaCliente categoria;
-    @OneToMany(mappedBy = "cliente")
     private List<Conta> contas;
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setCategoria(CategoriaCliente categoria) {
+        this.categoria = categoria;
+    }
 
     public void setCpf(String cpf) {
         this.cpf = cpf;

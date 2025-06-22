@@ -1,28 +1,32 @@
 package com.agsilvamhm.bancodigital.service;
 
-import com.agsilvamhm.bancodigital.controller.exception.GlobalExceptionHandler;
 import com.agsilvamhm.bancodigital.entity.Cliente;
-import com.agsilvamhm.bancodigital.repository.ClienteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.agsilvamhm.bancodigital.repository.ClienteDao;
+
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ClienteService {
-    @Autowired
-    private ClienteRepository clienteRepository;
 
-    public Cliente findById(Integer id) {
-        return null ; //clienteRepository.findById(id);;
+    private final ClienteDao clienteDao;
+
+    public ClienteService(ClienteDao clienteDao){
+        this.clienteDao = clienteDao;
     }
 
-    public Cliente cadastrarCliente(Cliente cliente) {
-        validarDados(cliente);
-        return clienteRepository.save(cliente);
+    public void criar(Cliente cliente, JwtAuthenticationToken token){
+            clienteDao.salvar(cliente);
     }
 
-    private void validarDados(Cliente cliente) {
-        // Validar CPF, nome, data de nascimento, endereço etc.
+    public Cliente getClienteId(Integer id){
+        return clienteDao.buscarPorId(id);
     }
 
-
+    public List listarClientes(){
+        List<Cliente> clientes = clienteDao.listarTodos();
+        return clientes;
+    }
 }

@@ -5,16 +5,16 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+//@Entity
+//@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Conta {
-    @Id
-    @GeneratedValue
+ //   @Id
+  //  @GeneratedValue
     private Long id;
     private BigDecimal saldo;
-    @ManyToOne
+ //   @ManyToOne
     private Cliente cliente;
-    @OneToMany(mappedBy = "conta")
+ //   @OneToMany(mappedBy = "conta")
     private List<Cartao> cartoes;
 
     public abstract void aplicarTaxasMensalouRendimentos();

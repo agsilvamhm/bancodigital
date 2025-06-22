@@ -2,11 +2,11 @@ package com.agsilvamhm.bancodigital.entity;
 
 import jakarta.persistence.Entity;
 
-@Entity
+//@Entity
 public class ContaCorrente extends Conta{
     private double taxaManutencao;
 
-    @Override
+  //  @Override
     public void aplicarTaxasMensalouRendimentos() {
 
     }

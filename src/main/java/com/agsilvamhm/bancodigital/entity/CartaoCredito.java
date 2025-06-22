@@ -6,15 +6,15 @@ import jakarta.persistence.OneToMany;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Entity
+//@Entity
 public class CartaoCredito extends Cartao{
     private double limite;
     private double totalGastoMes;
 
-    @OneToMany(mappedBy = "cartao")
+  //  @OneToMany(mappedBy = "cartao")
     private List<Seguro> seguros;
 
-    @Override
+  //  @Override
     public void realizarPagamento(BigDecimal valor) {
 
     }
