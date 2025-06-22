@@ -34,12 +34,16 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Void> newCliente(Cliente cliente){
+        clienteService.atualizar(cliente);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Cliente> delClienteById(@PathVariable Integer id) {
+        clienteService.deletar(id);
         return ResponseEntity.ok().build();
     }
 

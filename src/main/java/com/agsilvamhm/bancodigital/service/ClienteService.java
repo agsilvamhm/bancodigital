@@ -25,8 +25,16 @@ public class ClienteService {
         return clienteDao.buscarPorId(id);
     }
 
+    public void deletar(Integer id){
+        clienteDao.deletar(id);
+    }
+
     public List listarClientes(){
         List<Cliente> clientes = clienteDao.listarTodos();
         return clientes;
+    }
+
+    public void atualizar(Cliente cliente){
+        clienteDao.atualizar(cliente);
     }
 }
