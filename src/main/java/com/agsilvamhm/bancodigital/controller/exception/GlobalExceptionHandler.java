@@ -9,6 +9,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -46,6 +47,13 @@ public class GlobalExceptionHandler extends RuntimeException{
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body("Acesso negado: você não tem permissão para acessar este recurso.");
+    }
+
+    @ExceptionHandler(EntidadeNaoEncontradaException.class)
+    public ResponseEntity<String> handleRegistroNaoEncontradoException(EntidadeNaoEncontradaException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body("Registro não encontrado: " + ex.getMessage());
     }
 
     @ExceptionHandler(Throwable.class)
