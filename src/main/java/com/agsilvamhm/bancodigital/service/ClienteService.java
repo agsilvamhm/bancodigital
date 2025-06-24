@@ -4,7 +4,7 @@ import com.agsilvamhm.bancodigital.controller.exception.CpfDuplicadoException;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
 import com.agsilvamhm.bancodigital.entity.Cliente;
-import com.agsilvamhm.bancodigital.repository.ClienteDao;
+import com.agsilvamhm.bancodigital.dao.ClienteDao;
 
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;

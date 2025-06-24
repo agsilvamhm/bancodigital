@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.repository;
+package com.agsilvamhm.bancodigital.dao;
 
 import com.agsilvamhm.bancodigital.controller.exception.CpfDuplicadoException;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
