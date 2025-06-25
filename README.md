@@ -33,8 +33,27 @@ classDiagram
     -String name
   }
   
+    class Cliente {
+    -Integer id
+    -String cpf
+    -String nome
+    -LocalDate dataNascimento
+    -Endereco endereco
+    -CategoriaCliente categoria 
+    -Conta[] contas 
+  }
+  
+  classe Endereco {
+    -String rua
+    -Integer numero
+    -String complemento 
+    -String cidade
+    -String estado
+    -String cep 
+  }
 
   User "1" *-- "1..N" Role
+  Cliente "1" *-- "1..1" Endereco
   
 ```
 
