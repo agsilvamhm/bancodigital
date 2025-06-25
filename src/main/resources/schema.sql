@@ -28,7 +28,7 @@ CREATE TABLE conta_corrente (
 
 CREATE TABLE conta_poupanca (
     conta_id int PRIMARY KEY,
-    taxa_rendimento DECIMAL(5, 4) NOT NULL, -- Ex: 0.0050 para 0.5% a.m.
+    taxa_rendimento DECIMAL(5, 4) NOT NULL,
 
-    CONSTRAINT fk_cp_contas FOREIGN KEY (conta_id) REFERENCES conta(id) ON DELETE CASCADE,
+    CONSTRAINT fk_cp_contas FOREIGN KEY (conta_id) REFERENCES conta(id) ON DELETE CASCADE
 );
