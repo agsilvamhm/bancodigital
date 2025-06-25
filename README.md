@@ -38,18 +38,6 @@ classDiagram
   
 ```
 
-
-
-## Exemplo de fluxo no mermaid
-```mermaid
-graph TD
-A[Início] --> B{Decisão?};
-B -- Sim --> C[Ação 1];
-B -- Não --> D[Ação 2];
-C --> E[Fim];
-D --> E;
-```
-
 ## Fluxo de Camadas (Visão Estrutural)
 
 ```mermaid
@@ -92,10 +80,10 @@ graph TD
     end
 
     subgraph "Processamento no Backend"
-        Controller[1. Controller]
-        Service[2. Service]
-        DAO[3. DAO]
-        DB[(4. Banco de Dados)]
+        Controller[Controller]
+        Service[Service]
+        DAO[DAO]
+        DB[(Banco de Dados)]
     end
 
     subgraph "Geração da Resposta"
@@ -119,4 +107,15 @@ graph TD
     DAO -- Lança Exceção de Dados --> Service
     Service -- Lança Exceção de Negócio --> Controller
     Controller -- Captura Exceções --> ErrorResponse
+```
+
+
+## Exemplo de fluxo no mermaid
+```mermaid
+graph TD
+A[Início] --> B{Decisão?};
+B -- Sim --> C[Ação 1];
+B -- Não --> D[Ação 2];
+C --> E[Fim];
+D --> E;
 ```
