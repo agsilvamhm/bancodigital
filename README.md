@@ -43,7 +43,7 @@ classDiagram
     -Conta[] contas 
   }
   
-  classe Endereco {
+  class Endereco {
     -String rua
     -Integer numero
     -String complemento
