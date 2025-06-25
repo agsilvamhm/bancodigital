@@ -33,7 +33,7 @@ classDiagram
     -String name
   }
   
-    class Cliente {
+  class Cliente {
     -Integer id
     -String cpf
     -String nome
