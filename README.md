@@ -46,7 +46,7 @@ classDiagram
   classe Endereco {
     -String rua
     -Integer numero
-    -String complemento 
+    -String complemento
     -String cidade
     -String estado
     -String cep 
