@@ -52,7 +52,7 @@ D --> E;
 
 ## Fluxo de Camadas (Visão Estrutural)
 
-
+```mermaid
 graph LR
 %% --- Estilos para os nós ---
 style DB fill:#d5d5d5,stroke:#333,stroke-width:2px
@@ -75,8 +75,9 @@ style Success fill:#ccffcc,stroke:#006400,stroke-width:1px
 
     %% --- Expansão da Camada Controller (Resposta da Requisição) ---
     Controller -- Gera Resposta --> HttpResponse[Retorno de Sucesso<br>HTTP (2xx)]:::Success
+```
 
-
+```mermaid
 graph LR
 %% --- Estilos para os nós ---
 style DB fill:#d5d5d5,stroke:#333,stroke-width:2px
@@ -99,9 +100,11 @@ style Success fill:#ccffcc,stroke:#006400,stroke-width:1px
 
     %% --- Expansão da Camada Controller (Resposta da Requisição) ---
     Controller -- Gera Resposta --> HttpResponse[Retorno de Sucesso<br>HTTP (2xx)]:::Success
+```
 
 ## Fluxo de Requisição (Visão de Processamento)
 
+```mermaid
 graph TD
 %% --- Estilos ---
 style ErrorResponse fill:#ffcccc,stroke:#b22222,stroke-width:1px
@@ -140,8 +143,9 @@ style SuccessResponse fill:#ccffcc,stroke:#006400,stroke-width:1px
     DAO -- Lança Exceção de Dados --> Service
     Service -- Lança Exceção de Negócio --> Controller
     Controller -- Captura Exceções --> ErrorResponse
+```
 
-
+```mermaid
 graph TD
 %% --- Estilos ---
 style ErrorResponse fill:#ffcccc,stroke:#b2222ä2,stroke-width:1px
@@ -180,3 +184,4 @@ style SuccessResponse fill:#ccffcc,stroke:#006400,stroke-width:1px
     DAO -- Lança Exceção de Dados --> Service
     Service -- Lança Exceção de Negócio --> Controller
     Controller -- Captura Exceções --> ErrorResponse
+```
