@@ -54,10 +54,10 @@ D --> E;
 
 ```mermaid
 graph LR
-%% --- Estilos para os nós ---
-style DB fill:#d5d5d5,stroke:#333,stroke-width:2px
-style Ex fill:#ffcccc,stroke:#b22222,stroke-width:1px
-style Success fill:#ccffcc,stroke:#006400,stroke-width:1px
+    %% --- Estilos para os nós ---
+    style DB fill:#d5d5d5,stroke:#333,stroke-width:2px
+    style Ex fill:#ffcccc,stroke:#b22222,stroke-width:1px
+    style Success fill:#ccffcc,stroke:#006400,stroke-width:1px
 
     %% --- Fluxo Principal ---
     DB[(Tabela do<br>Banco de Dados)] --> POJO[Classe POJO]
@@ -66,23 +66,23 @@ style Success fill:#ccffcc,stroke:#006400,stroke-width:1px
     Service --> Controller[Classe Controller]
 
     %% --- Expansão da Camada DAO ---
-    DAO -- Retorna --> DaoSuccess[Mensagem de Sucesso]:::Success
-    DAO -- Lança --> DaoException[Exceção de Acesso<br>a Dados]:::Ex
+    DAO -- Retorna --> DaoSuccess["Mensagem de Sucesso"]:::Success
+    DAO -- Lança --> DaoException["Exceção de Acesso<br>a Dados"]:::Ex
 
     %% --- Expansão da Camada Service ---
-    Service -- Retorna --> ServiceSuccess[Mensagem de Sucesso]:::Success
-    Service -- Lança --> ServiceException[Exceção de Regra<br>de Negócio]:::Ex
+    Service -- Retorna --> ServiceSuccess["Mensagem de Sucesso"]:::Success
+    Service -- Lança --> ServiceException["Exceção de Regra<br>de Negócio"]:::Ex
 
     %% --- Expansão da Camada Controller (Resposta da Requisição) ---
-    Controller -- Gera Resposta --> HttpResponse[Retorno de Sucesso<br>HTTP (2xx)]:::Success
+    Controller -- Gera Resposta --> HttpResponse["Retorno de Sucesso<br>HTTP (2xx)"]:::Success
 ```
 
 ```mermaid
 graph LR
-%% --- Estilos para os nós ---
-style DB fill:#d5d5d5,stroke:#333,stroke-width:2px
-style Ex fill:#ffcccc,stroke:#b22222,stroke-width:1px
-style Success fill:#ccffcc,stroke:#006400,stroke-width:1px
+    %% --- Estilos para os nós ---
+    style DB fill:#d5d5d5,stroke:#333,stroke-width:2px
+    style Ex fill:#ffcccc,stroke:#b22222,stroke-width:1px
+    style Success fill:#ccffcc,stroke:#006400,stroke-width:1px
 
     %% --- Fluxo Principal ---
     DB[(Tabela do<br>Banco de Dados)] --> POJO[Classe POJO]
@@ -91,25 +91,25 @@ style Success fill:#ccffcc,stroke:#006400,stroke-width:1px
     Service --> Controller[Classe Controller]
 
     %% --- Expansão da Camada DAO ---
-    DAO -- Retorna --> DaoSuccess[Mensagem de Sucesso]:::Success
-    DAO -- Lança --> DaoException[Exceção de Acesso<br>a Dados]:::Ex
+    DAO -- Retorna --> DaoSuccess["Mensagem de Sucesso"]:::Success
+    DAO -- Lança --> DaoException["Exceção de Acesso<br>a Dados"]:::Ex
 
     %% --- Expansão da Camada Service ---
-    Service -- Retorna --> ServiceSuccess[Mensagem de Sucesso]:::Success
-    Service -- Lança --> ServiceException[Exceção de Regra<br>de Negócio]:::Ex
+    Service -- Retorna --> ServiceSuccess["Mensagem de Sucesso"]:::Success
+    Service -- Lança --> ServiceException["Exceção de Regra<br>de Negócio"]:::Ex
 
     %% --- Expansão da Camada Controller (Resposta da Requisição) ---
-    Controller -- Gera Resposta --> HttpResponse[Retorno de Sucesso<br>HTTP (2xx)]:::Success
+    Controller -- Gera Resposta --> HttpResponse["Retorno de Sucesso<br>HTTP (2xx)"]:::Success
 ```
 
 ## Fluxo de Requisição (Visão de Processamento)
 
 ```mermaid
 graph TD
-%% --- Estilos ---
-style ErrorResponse fill:#ffcccc,stroke:#b22222,stroke-width:1px
-style SuccessResponse fill:#ccffcc,stroke:#006400,stroke-width:1px
-
+    %% --- Estilos ---
+    style ErrorResponse fill:#ffcccc,stroke:#b22222,stroke-width:1px
+    style SuccessResponse fill:#ccffcc,stroke:#006400,stroke-width:1px
+    
     %% --- Fluxo da Requisição ---
     subgraph "Requisição do Cliente"
         Request[HTTP Request]
@@ -123,8 +123,8 @@ style SuccessResponse fill:#ccffcc,stroke:#006400,stroke-width:1px
     end
 
     subgraph "Geração da Resposta"
-        SuccessResponse[Resposta de Sucesso (2xx)]:::SuccessResponse
-        ErrorResponse[Resposta de Erro (4xx/5xx)]:::ErrorResponse
+        SuccessResponse["Resposta de Sucesso (2xx)"]:::SuccessResponse
+        ErrorResponse["Resposta de Erro (4xx/5xx)"]:::ErrorResponse
     end
 
     %% --- Conexões do Fluxo ---
