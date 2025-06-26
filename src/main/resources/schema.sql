@@ -1,9 +1,21 @@
+CREATE TABLE endereco(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    rua VARCHAR(50) NOT NULL,
+    numero INT NOT NULL,
+    complemento VARCHAR(50) NOT NULL,
+    cidade VARCHAR(50) NOT NULL,
+    estado VARCHAR(2) NOT NULL,
+    cep VARCHAR(8) NOT NULL
+);
+
 CREATE TABLE cliente (
     id INT PRIMARY KEY AUTO_INCREMENT,
     cpf VARCHAR(11) NOT NULL UNIQUE,
     nome VARCHAR(255),
     data_nascimento DATE,
-    categoria VARCHAR(50)
+    categoria VARCHAR(50),
+    id_endereco int,
+    constraint cliente_endereco FOREIGN KEY (id_endereco) REFERENCES endereco(id)
 );
 
 CREATE TABLE conta (
