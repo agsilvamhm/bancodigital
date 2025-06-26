@@ -43,7 +43,8 @@ classDiagram
     -String cep 
   }
 
-  <<Abstract>> Conta {
+  class Conta {
+    <<Abstract>>
     #Integer id
     #String numero
     #String agencia
