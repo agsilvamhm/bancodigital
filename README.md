@@ -74,13 +74,14 @@ classDiagram
     -String descricao
   }
 
-  <<enumeration>> TipoMovimentacao {
-    DEPOSITO
-    SAQUE
-    TRANSFERENCIA
-    PIX
-    R_TRANSFERENCIA
-    R_PIX
+  class TipoMovimentacao {
+      <<enumeration>>
+      DEPOSITO
+      SAQUE
+      TRANSFERENCIA
+      PIX
+      R_TRANSFERENCIA
+      R_PIX
   }
 
   Cliente "1" -- "1" Endereco : possui
@@ -89,7 +90,6 @@ classDiagram
   Conta <|-- ContaPoupanca : extends
   Conta "1" -- "0..N" Movimentacao : registra
   Movimentacao "1" -- "1" TipoMovimentacao : é do tipo
-  
   
 ```
 
