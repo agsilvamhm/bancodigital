@@ -3,44 +3,64 @@ package com.agsilvamhm.bancodigital.dao;
 import com.agsilvamhm.bancodigital.controller.exception.CpfDuplicadoException;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
-import com.agsilvamhm.bancodigital.entity.Cliente;
+import com.agsilvamhm.bancodigital.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Repository
 public class ClienteDao {
 
     private static final Logger logger = LoggerFactory.getLogger(ClienteDao.class);
-    private static final String INSERT_CLIENTE = "INSERT INTO cliente (cpf, nome, data_nascimento, categoria) VALUES (?, ?, ?, ?)";
-    private static final String SELECT_BY_ID = "SELECT * FROM cliente WHERE id = ?";
-    private static final String SELECT_ALL = "SELECT * FROM cliente";
-    private static final String UPDATE_CLIENTE = "UPDATE cliente SET cpf = ?, nome = ?, data_nascimento = ?, categoria = ? WHERE id = ?";
+
+    // Query otimizada para buscar Cliente, Endereço e Contas em uma única chamada.
+    private static final String BASE_SELECT_SQL =
+            "SELECT " +
+                    "c.id as cliente_id, c.cpf, c.nome, c.data_nascimento, c.categoria, " +
+                    "e.id as endereco_id, e.rua, e.numero as endereco_numero, e.complemento, e.cidade, e.estado, e.cep, " +
+                    "cta.id as conta_id, cta.numero as conta_numero, cta.agencia, cta.saldo, cta.tipo_conta, " +
+                    "cta.taxa_manutencao_mensal, cta.taxa_rendimento_mensal " +
+                    "FROM cliente c " +
+                    "LEFT JOIN endereco e ON c.id_endereco = e.id " +
+                    "LEFT JOIN conta cta ON c.id = cta.id_cliente ";
+
+    private static final String INSERT_CLIENTE = "INSERT INTO cliente (cpf, nome, data_nascimento, categoria, id_endereco) VALUES (?, ?, ?, ?, ?)";
+    private static final String SELECT_BY_ID = BASE_SELECT_SQL + "WHERE c.id = ?";
+    private static final String SELECT_ALL = BASE_SELECT_SQL + "ORDER BY c.id";
+    private static final String UPDATE_CLIENTE = "UPDATE cliente SET cpf = ?, nome = ?, data_nascimento = ?, categoria = ?, id_endereco = ? WHERE id = ?";
     private static final String DELETE_BY_ID = "DELETE FROM cliente WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public ClienteDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    // O método salvar não precisa de alterações.
     public void salvar(Cliente cliente) {
         Objects.requireNonNull(cliente, "O objeto cliente não pode ser nulo.");
+        Objects.requireNonNull(cliente.getEndereco(), "O endereço do cliente não pode ser nulo.");
+        Objects.requireNonNull(cliente.getEndereco().getId(), "O ID do endereço do cliente não pode ser nulo.");
+
         try {
             jdbcTemplate.update(INSERT_CLIENTE,
                     cliente.getCpf(),
                     cliente.getNome(),
                     cliente.getDataNascimento(),
-                    cliente.getCategoria().name());
+                    cliente.getCategoria().name(),
+                    cliente.getEndereco().getId());
             logger.info("Cliente salvo com sucesso: {}", cliente.getCpf());
         } catch (DuplicateKeyException ex) {
             logger.error("Erro ao salvar cliente: CPF já cadastrado - {}", cliente.getCpf(), ex);
@@ -51,38 +71,48 @@ public class ClienteDao {
         }
     }
 
+    /**
+     * Busca um cliente por ID e carrega sua lista de contas associadas usando uma única query.
+     * @param id O ID do cliente.
+     * @return um Optional contendo o Cliente completo.
+     */
     public Optional<Cliente> buscarPorId(Integer id) {
-        // --- Boas Práticas: Retornar Optional para evitar NullPointerException ---
         try {
-            Cliente cliente = jdbcTemplate.queryForObject(SELECT_BY_ID, new BeanPropertyRowMapper<>(Cliente.class), id);
-            return Optional.ofNullable(cliente);
-        } catch (EmptyResultDataAccessException ex) {
-            logger.warn("Nenhum cliente encontrado com o ID: {}", id);
-            return Optional.empty(); // Retorna um Optional vazio, uma prática moderna e segura.
+            List<Cliente> clientes = jdbcTemplate.query(SELECT_BY_ID, new ClienteResultSetExtractor(), id);
+            return clientes.isEmpty() ? Optional.empty() : Optional.of(clientes.get(0));
         } catch (DataAccessException ex) {
             logger.error("Erro de acesso a dados ao buscar cliente pelo ID: {}", id, ex);
             throw new RepositorioException("Erro ao buscar cliente por ID.", ex);
         }
     }
 
+    /**
+     * Lista todos os clientes e suas contas usando uma única query otimizada.
+     * @return Uma lista de todos os clientes com suas contas.
+     */
     public List<Cliente> listarTodos() {
         try {
-            return jdbcTemplate.query(SELECT_ALL, new BeanPropertyRowMapper<>(Cliente.class));
+            return jdbcTemplate.query(SELECT_ALL, new ClienteResultSetExtractor());
         } catch (DataAccessException ex) {
             logger.error("Erro de acesso a dados ao listar todos os clientes.", ex);
             throw new RepositorioException("Erro ao listar todos os clientes.", ex);
         }
     }
 
+    // O método de atualização permanece focado no cliente.
     public void atualizar(Cliente cliente) {
         Objects.requireNonNull(cliente, "O objeto cliente não pode ser nulo.");
         Objects.requireNonNull(cliente.getId(), "O ID do cliente não pode ser nulo para atualização.");
+        Objects.requireNonNull(cliente.getEndereco(), "O endereço do cliente não pode ser nulo para atualização.");
+        Objects.requireNonNull(cliente.getEndereco().getId(), "O ID do endereço do cliente não pode ser nulo para atualização.");
+
         try {
             int linhasAfetadas = jdbcTemplate.update(UPDATE_CLIENTE,
                     cliente.getCpf(),
                     cliente.getNome(),
                     cliente.getDataNascimento(),
                     cliente.getCategoria().name(),
+                    cliente.getEndereco().getId(),
                     cliente.getId());
 
             if (linhasAfetadas == 0) {
@@ -91,13 +121,14 @@ public class ClienteDao {
             logger.info("Cliente atualizado com sucesso: ID {}", cliente.getId());
         } catch (DuplicateKeyException ex) {
             logger.error("Erro ao atualizar cliente: CPF já cadastrado - {}", cliente.getCpf(), ex);
-            throw new CpfDuplicadoException("Não foi possível atualizar, o CPF informado já pertence a outro cliente. <br>" + ex.getMessage());
+            throw new CpfDuplicadoException("Não foi possível atualizar, o CPF informado já pertence a outro cliente.");
         } catch (DataAccessException ex) {
             logger.error("Erro de acesso a dados ao tentar atualizar o cliente: {}", cliente.getId(), ex);
             throw new RepositorioException("Erro ao atualizar cliente.", ex);
         }
     }
 
+    // O método de deleção não muda.
     public void deletar(Integer id) {
         Objects.requireNonNull(id, "O ID para deleção não pode ser nulo.");
         try {
@@ -109,6 +140,78 @@ public class ClienteDao {
         } catch (DataAccessException ex) {
             logger.error("Erro de acesso a dados ao deletar cliente pelo ID: {}", id, ex);
             throw new RepositorioException("Erro ao deletar cliente.", ex);
+        }
+    }
+
+    /**
+     * Usa o padrão ResultSetExtractor para mapear um resultado de múltiplas linhas (com JOINs)
+     * em uma lista de objetos Cliente, onde cada cliente contém sua lista de Contas.
+     */
+    private static class ClienteResultSetExtractor implements ResultSetExtractor<List<Cliente>> {
+        @Override
+        public List<Cliente> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            Map<Integer, Cliente> clienteMap = new LinkedHashMap<>(); // Mantém a ordem de inserção
+
+            while (rs.next()) {
+                Integer clienteId = rs.getInt("cliente_id");
+                Cliente cliente = clienteMap.get(clienteId);
+
+                // Se é a primeira vez que vemos este cliente, criamos o objeto principal
+                if (cliente == null) {
+                    cliente = new Cliente();
+                    cliente.setId(clienteId);
+                    cliente.setCpf(rs.getString("cpf"));
+                    cliente.setNome(rs.getString("nome"));
+                    if (rs.getDate("data_nascimento") != null) {
+                        cliente.setDataNascimento(rs.getDate("data_nascimento").toLocalDate());
+                    }
+                    if (rs.getString("categoria") != null) {
+                        cliente.setCategoria(CategoriaCliente.valueOf(rs.getString("categoria")));
+                    }
+                    cliente.setContas(new ArrayList<>());
+
+                    // Mapeia o Endereco (apenas se existir, devido ao LEFT JOIN)
+                    if (rs.getInt("endereco_id") != 0) {
+                        Endereco endereco = new Endereco();
+                        endereco.setId(rs.getInt("endereco_id"));
+                        endereco.setRua(rs.getString("rua"));
+                        endereco.setNumero(rs.getInt("endereco_numero"));
+                        endereco.setComplemento(rs.getString("complemento"));
+                        endereco.setCidade(rs.getString("cidade"));
+                        endereco.setEstado(rs.getString("estado"));
+                        endereco.setCep(rs.getString("cep"));
+                        cliente.setEndereco(endereco);
+                    }
+                    clienteMap.put(clienteId, cliente);
+                }
+
+                // Mapeia a Conta (apenas se existir, devido ao LEFT JOIN)
+                if (rs.getInt("conta_id") != 0) {
+                    String tipoConta = rs.getString("tipo_conta");
+                    Conta conta;
+
+                    if ("CORRENTE".equals(tipoConta)) {
+                        ContaCorrente cc = new ContaCorrente();
+                        cc.setTaxaManutencaoMensal(rs.getDouble("taxa_manutencao_mensal"));
+                        conta = cc;
+                    } else if ("POUPANCA".equals(tipoConta)) {
+                        ContaPoupanca cp = new ContaPoupanca();
+                        cp.setTaxaRendimentoMensal(rs.getDouble("taxa_rendimento_mensal"));
+                        conta = cp;
+                    } else {
+                        continue; // Ignora se o tipo de conta for nulo ou desconhecido
+                    }
+
+                    conta.setId(rs.getInt("conta_id"));
+                    conta.setNumero(rs.getString("conta_numero"));
+                    conta.setAgencia(rs.getString("agencia"));
+                    conta.setSaldo(rs.getDouble("saldo"));
+                    conta.setCliente(cliente);
+
+                    cliente.getContas().add(conta);
+                }
+            }
+            return new ArrayList<>(clienteMap.values());
         }
     }
 }

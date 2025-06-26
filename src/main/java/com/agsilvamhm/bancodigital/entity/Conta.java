@@ -5,67 +5,66 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-public class Conta {
+public abstract class Conta {
 
-    private Integer id;
-    private Integer idCliente;
-    private String agencia;
-    private String numeroConta;
-    private BigDecimal saldo;
-    private LocalDateTime dataAbertura; // Atributo novo
+    private Integer id; // ID único da conta (gerado pelo banco)
+    private String numero; // Número da conta (ex: "00123-4")
+    private String agencia; // Agência (ex: "0001")
+    private double saldo;
+    private Cliente cliente; // Associação com o dono da conta
+    private List<Movimentacao> movimentacoes; // Histórico de transações
 
-    public Conta() {
+    public Integer getId() {
+        return id;
     }
 
-    // Construtor atualizado para incluir dataAbertura
-    public Conta(Integer id, Integer idCliente, String agencia, String numeroConta, BigDecimal saldo, LocalDateTime dataAbertura) {
+    public void setId(Integer id) {
         this.id = id;
-        this.idCliente = idCliente;
+    }
+
+    public String getNumero() {
+        return numero;
+    }
+
+    public void setNumero(String numero) {
+        this.numero = numero;
+    }
+
+    public String getAgencia() {
+        return agencia;
+    }
+
+    public void setAgencia(String agencia) {
         this.agencia = agencia;
-        this.numeroConta = numeroConta;
+    }
+
+    public double getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(double saldo) {
         this.saldo = saldo;
-        this.dataAbertura = dataAbertura;
     }
 
-    // Getters e Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
-    public Integer getIdCliente() { return idCliente; }
-    public void setIdCliente(Integer idCliente) { this.idCliente = idCliente; }
-    public String getAgencia() { return agencia; }
-    public void setAgencia(String agencia) { this.agencia = agencia; }
-    public String getNumeroConta() { return numeroConta; }
-    public void setNumeroConta(String numeroConta) { this.numeroConta = numeroConta; }
-    public BigDecimal getSaldo() { return saldo; }
-    public void setSaldo(BigDecimal saldo) { this.saldo = saldo; }
-
-    // Getter e Setter para o novo atributo
-    public LocalDateTime getDataAbertura() { return dataAbertura; }
-    public void setDataAbertura(LocalDateTime dataAbertura) { this.dataAbertura = dataAbertura; }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Conta conta = (Conta) o;
-        return Objects.equals(agencia, conta.agencia) && Objects.equals(numeroConta, conta.numeroConta);
+    public Cliente getCliente() {
+        return cliente;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(agencia, numeroConta);
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
 
-    // toString atualizado
-    @Override
-    public String toString() {
-        return "Conta{" +
-                "id=" + id +
-                ", idCliente=" + idCliente +
-                ", agencia='" + agencia + '\'' +
-                ", numeroConta='" + numeroConta + '\'' +
-                ", saldo=" + saldo +
-                ", dataAbertura=" + dataAbertura + // Novo campo
-                '}';
+    public List<Movimentacao> getMovimentacoes() {
+        return movimentacoes;
     }
+
+    public void setMovimentacoes(List<Movimentacao> movimentacoes) {
+        this.movimentacoes = movimentacoes;
+    }
+
+    // Getters e Setters...
+
+    // Método abstrato que força as subclasses a definirem suas próprias regras
+    // de operações mensais (taxas, rendimentos, etc.)
+    public abstract void aplicarOperacoesMensais();
 }

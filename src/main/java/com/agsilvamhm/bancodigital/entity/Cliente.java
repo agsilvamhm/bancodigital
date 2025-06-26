@@ -20,6 +20,10 @@ public class Cliente {
         this.categoria = categoria;
     }
 
+    public void setContas(List<Conta> contas) {
+        this.contas = contas;
+    }
+
     public void setCpf(String cpf) {
         this.cpf = cpf;
     }
@@ -60,4 +64,7 @@ public class Cliente {
         return contas;
     }
 
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
+    }
 }

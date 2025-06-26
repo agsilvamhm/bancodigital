@@ -1,12 +1,21 @@
 package com.agsilvamhm.bancodigital.entity;
 
 public class Endereco {
+    private Integer id;
     private String rua;
     private Integer numero;
     private String complemento;
     private String cidade;
     private String estado;
     private String cep;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getRua() {
         return rua;
@@ -55,6 +64,8 @@ public class Endereco {
     public void setCep(String cep) {
         this.cep = cep;
     }
+
+
 }
 
 

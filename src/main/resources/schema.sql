@@ -19,28 +19,32 @@ CREATE TABLE cliente (
 );
 
 CREATE TABLE conta (
-    id int AUTO_INCREMENT PRIMARY KEY,
-    id_cliente int NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    numero VARCHAR(20) NOT NULL UNIQUE,
     agencia VARCHAR(10) NOT NULL,
-    numero_conta VARCHAR(20) NOT NULL,
     saldo DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-    data_abertura TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_cliente INT NOT NULL,
 
-    CONSTRAINT uk_agencia_numero UNIQUE (agencia, numero_conta),
+    -- Coluna para diferenciar os tipos de conta
+    tipo_conta VARCHAR(20) NOT NULL, -- 'CORRENTE' ou 'POUPANCA'
 
-    CONSTRAINT fk_contas_clientes FOREIGN KEY (id_cliente) REFERENCES cliente(id)
+    -- Colunas específicas (podem ser nulas dependendo do tipo)
+    taxa_manutencao_mensal DECIMAL(10, 2), -- Apenas para Conta Corrente
+    taxa_rendimento_mensal DECIMAL(5, 4),   -- Apenas para Conta Poupança
+
+    CONSTRAINT conta_cliente_fk FOREIGN KEY (id_cliente) REFERENCES cliente(id)
 );
 
-CREATE TABLE conta_corrente (
-    conta_id int PRIMARY KEY,
-    taxa_manutencao DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+-- Tabela para registrar todas as movimentações
+CREATE TABLE movimentacao (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    tipo VARCHAR(50) NOT NULL, -- 'DEPOSITO', 'SAQUE', 'PIX', etc.
+    valor DECIMAL(15, 2) NOT NULL,
+    data_hora DATETIME NOT NULL,
+    id_conta_origem INT,
+    id_conta_destino INT,
+    descricao VARCHAR(255),
 
-    CONSTRAINT fk_cc_contas FOREIGN KEY (conta_id) REFERENCES conta(id) ON DELETE CASCADE
-);
-
-CREATE TABLE conta_poupanca (
-    conta_id int PRIMARY KEY,
-    taxa_rendimento DECIMAL(5, 4) NOT NULL,
-
-    CONSTRAINT fk_cp_contas FOREIGN KEY (conta_id) REFERENCES conta(id) ON DELETE CASCADE
+    CONSTRAINT mov_conta_origem_fk FOREIGN KEY (id_conta_origem) REFERENCES conta(id),
+    CONSTRAINT mov_conta_destino_fk FOREIGN KEY (id_conta_destino) REFERENCES conta(id)
 );

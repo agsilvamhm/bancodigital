@@ -3,12 +3,15 @@ package com.agsilvamhm.bancodigital.service;
 import com.agsilvamhm.bancodigital.controller.exception.CpfDuplicadoException;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
+import com.agsilvamhm.bancodigital.dao.EnderecoDao;
 import com.agsilvamhm.bancodigital.entity.Cliente;
 import com.agsilvamhm.bancodigital.dao.ClienteDao;
 
+import com.agsilvamhm.bancodigital.entity.Endereco;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,50 +23,71 @@ public class ClienteService {
     private static final Logger logger = LoggerFactory.getLogger(ClienteService.class);
 
     private final ClienteDao clienteDao;
+    private final EnderecoDao enderecoDao; // Adicionada a dependência do EnderecoDao
 
-    public ClienteService(ClienteDao clienteDao) {
+    @Autowired
+    public ClienteService(ClienteDao clienteDao, EnderecoDao enderecoDao) {
         this.clienteDao = clienteDao;
+        this.enderecoDao = enderecoDao; // Injetando o EnderecoDao
     }
 
-    @Transactional // Garante que a operação seja atômica. Se ocorrer um erro, nada é salvo.
+    @Transactional
     public Cliente criarCliente(Cliente cliente) {
         Objects.requireNonNull(cliente, "O objeto cliente não pode ser nulo.");
+        Objects.requireNonNull(cliente.getEndereco(), "O cliente deve possuir um endereço.");
         validarCliente(cliente);
+
         try {
+
+            Endereco endereco = cliente.getEndereco();
+            Integer idEndereco = enderecoDao.salvar(endereco);
+            endereco.setId(idEndereco); // Atribui o ID de volta ao objeto
+
             clienteDao.salvar(cliente);
             logger.info("Serviço: Cliente com CPF {} foi criado com sucesso.", cliente.getCpf());
+
+            return cliente;
         } catch (CpfDuplicadoException | RepositorioException ex) {
             logger.error("Serviço: Erro ao tentar criar cliente com CPF {}: {}", cliente.getCpf(), ex.getMessage());
+
             throw ex;
         }
-        return cliente;
     }
 
     public Cliente buscarPorId(Integer id) {
         Objects.requireNonNull(id, "O ID do cliente não pode ser nulo.");
         logger.debug("Serviço: Buscando cliente com ID: {}", id);
+
         return clienteDao.buscarPorId(id)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente com ID " + id + " não encontrado."));
     }
 
     public List<Cliente> listarTodos() {
         logger.debug("Serviço: Listando todos os clientes.");
-        // A exceção RepositorioException do DAO será propagada se ocorrer um erro.
         return clienteDao.listarTodos();
     }
 
     @Transactional
-    public Cliente atualizarCliente(Integer id, Cliente cliente) {
+    public Cliente atualizarCliente(Integer id, Cliente clienteAtualizado) {
         Objects.requireNonNull(id, "O ID do cliente não pode ser nulo.");
-        Objects.requireNonNull(cliente, "O objeto cliente não pode ser nulo.");
+        Objects.requireNonNull(clienteAtualizado, "O objeto cliente não pode ser nulo.");
+
         Cliente clienteExistente = buscarPorId(id);
 
-        validarCliente(cliente);
+        validarCliente(clienteAtualizado);
 
-        clienteExistente.setNome(cliente.getNome());
-        clienteExistente.setCpf(cliente.getCpf());
-        clienteExistente.setDataNascimento(cliente.getDataNascimento());
-        clienteExistente.setCategoria(cliente.getCategoria());
+
+        Endereco enderecoParaAtualizar = clienteAtualizado.getEndereco();
+
+        enderecoParaAtualizar.setId(clienteExistente.getEndereco().getId());
+        enderecoDao.atualizar(enderecoParaAtualizar);
+
+        clienteExistente.setNome(clienteAtualizado.getNome());
+        clienteExistente.setCpf(clienteAtualizado.getCpf());
+        clienteExistente.setDataNascimento(clienteAtualizado.getDataNascimento());
+        clienteExistente.setCategoria(clienteAtualizado.getCategoria());
+        clienteExistente.setEndereco(enderecoParaAtualizar); // Associa o endereço atualizado
+
         clienteDao.atualizar(clienteExistente);
         logger.info("Serviço: Cliente com ID {} foi atualizado com sucesso.", id);
 
@@ -73,11 +97,16 @@ public class ClienteService {
     @Transactional
     public void deletarPorId(Integer id) {
         Objects.requireNonNull(id, "O ID do cliente não pode ser nulo.");
-        if (!clienteDao.buscarPorId(id).isPresent()) {
-            throw new EntidadeNaoEncontradaException("Cliente com ID " + id + " não encontrado para deleção.");
-        }
+
+        Cliente cliente = buscarPorId(id);
+
+        Integer idEndereco = cliente.getEndereco().getId();
+
         clienteDao.deletar(id);
-        logger.info("Serviço: Cliente com ID {} foi deletado com sucesso.", id);
+
+        enderecoDao.deletar(idEndereco);
+
+        logger.info("Serviço: Cliente com ID {} e endereço associado ID {} foram deletados com sucesso.", id, idEndereco);
     }
 
     private void validarCliente(Cliente cliente) {

@@ -44,6 +44,7 @@ classDiagram
   }
   
   class Endereco {
+    -Integer id
     -String rua
     -Integer numero
     -String complemento
