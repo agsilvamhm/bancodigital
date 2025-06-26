@@ -21,18 +21,8 @@ http://localhost:8080/swagger-ui/index.html
 
 ```mermaid
 classDiagram
-  class User {
-    -UUID userId
-    -String username
-    -String password
-    -Role[] roles
-  }
+  direction LR
 
-  class Role {
-    -Long roleId
-    -String name
-  }
-  
   class Cliente {
     -Integer id
     -String cpf
@@ -40,7 +30,7 @@ classDiagram
     -LocalDate dataNascimento
     -Endereco endereco
     -CategoriaCliente categoria 
-    -Conta[] contas 
+    -List~Conta~ contas 
   }
   
   class Endereco {
@@ -53,8 +43,52 @@ classDiagram
     -String cep 
   }
 
-  User "1" *-- "1..N" Role
-  Cliente "1" *-- "1..1" Endereco
+  <<Abstract>> Conta {
+    #Integer id
+    #String numero
+    #String agencia
+    #double saldo
+    #Cliente cliente
+    #List~Movimentacao~ movimentacoes
+    +aplicarOperacoesMensais()*
+  }
+
+  class ContaCorrente {
+    -double taxaManutencaoMensal
+    +aplicarOperacoesMensais()
+  }
+
+  class ContaPoupanca {
+    -double taxaRendimentoMensal
+    +aplicarOperacoesMensais()
+  }
+
+  class Movimentacao {
+    -Integer id
+    -TipoMovimentacao tipo
+    -double valor
+    -LocalDateTime dataHora
+    -Conta contaOrigem
+    -Conta contaDestino
+    -String descricao
+  }
+
+  <<enumeration>> TipoMovimentacao {
+    DEPOSITO
+    SAQUE
+    TRANSFERENCIA
+    PIX
+    R_TRANSFERENCIA
+    R_PIX
+  }
+
+  Cliente "1" -- "1" Endereco : possui
+  Cliente "1" -- "0..N" Conta : possui
+  Conta <|-- ContaCorrente : extends
+  Conta <|-- ContaPoupanca : extends
+  Conta "1" -- "0..N" Movimentacao : registra
+  Movimentacao "1" -- "1" TipoMovimentacao : é do tipo
+  
   
 ```
 
