@@ -79,6 +79,18 @@ public class GlobalExceptionHandler extends RuntimeException{
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
+    @ExceptionHandler(CpfInvalidoException.class)
+    public ResponseEntity<Map<String, Object>> handleRegistroNaoEncontradoException(CpfInvalidoException ex, HttpServletRequest request) {
+        logger.warn("CPF Inválido: {}", ex.getMessage());
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "CPF inválido");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<Map<String, Object>> handlerUnexpectedException(Throwable ex, HttpServletRequest request) {
         logger.error("Erro inesperado no servidor ao processar a requisição para {}", request.getRequestURI(), ex);

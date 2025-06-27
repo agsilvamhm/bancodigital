@@ -1,6 +1,7 @@
 package com.agsilvamhm.bancodigital.service;
 
 import com.agsilvamhm.bancodigital.controller.exception.CpfDuplicadoException;
+import com.agsilvamhm.bancodigital.controller.exception.CpfInvalidoException;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
 import com.agsilvamhm.bancodigital.dao.EnderecoDao;
@@ -23,12 +24,12 @@ public class ClienteService {
     private static final Logger logger = LoggerFactory.getLogger(ClienteService.class);
 
     private final ClienteDao clienteDao;
-    private final EnderecoDao enderecoDao; // Adicionada a dependência do EnderecoDao
+    private final EnderecoDao enderecoDao;
 
     @Autowired
     public ClienteService(ClienteDao clienteDao, EnderecoDao enderecoDao) {
         this.clienteDao = clienteDao;
-        this.enderecoDao = enderecoDao; // Injetando o EnderecoDao
+        this.enderecoDao = enderecoDao;
     }
 
     @Transactional
@@ -41,7 +42,7 @@ public class ClienteService {
 
             Endereco endereco = cliente.getEndereco();
             Integer idEndereco = enderecoDao.salvar(endereco);
-            endereco.setId(idEndereco); // Atribui o ID de volta ao objeto
+            endereco.setId(idEndereco);
 
             clienteDao.salvar(cliente);
             logger.info("Serviço: Cliente com CPF {} foi criado com sucesso.", cliente.getCpf());
@@ -75,7 +76,6 @@ public class ClienteService {
         Cliente clienteExistente = buscarPorId(id);
 
         validarCliente(clienteAtualizado);
-
 
         Endereco enderecoParaAtualizar = clienteAtualizado.getEndereco();
 
@@ -113,5 +113,42 @@ public class ClienteService {
         if (cliente.getNome() == null || cliente.getNome().trim().isEmpty()) {
             throw new IllegalArgumentException("O nome do cliente não pode ser vazio.");
         }
+        if(!validarCpf(cliente.getCpf())){
+            throw new CpfInvalidoException("CPF inválido!");
+        }
+    }
+
+    private boolean validarCpf(String cpf){
+        cpf = cpf.replaceAll("[^0-9]", "");
+        if (cpf.length() != 11) {
+            return false;
+        }
+
+        if (cpf.matches("(\\d)\\1{10}")) {
+            return false;
+        }
+
+        int soma = 0;
+        for (int i = 0; i < 9; i++) {
+            soma += (cpf.charAt(i) - '0') * (10 - i);
+        }
+        int resto = 11 - (soma % 11);
+        int digito1 = (resto >= 10) ? 0 : resto;
+
+        if ((cpf.charAt(9) - '0') != digito1) {
+            return false;
+        }
+
+        soma = 0;
+        for (int i = 0; i < 10; i++) {
+            soma += (cpf.charAt(i) - '0') * (11 - i);
+        }
+        resto = 11 - (soma % 11);
+        int digito2 = (resto >= 10) ? 0 : resto;
+
+        if ((cpf.charAt(10) - '0') != digito2) {
+            return false;
+        }
+        return true;
     }
 }

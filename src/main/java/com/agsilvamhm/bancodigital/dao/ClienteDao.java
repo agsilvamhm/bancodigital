@@ -9,10 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -24,7 +22,6 @@ public class ClienteDao {
 
     private static final Logger logger = LoggerFactory.getLogger(ClienteDao.class);
 
-    // Query otimizada para buscar Cliente, Endereço e Contas em uma única chamada.
     private static final String BASE_SELECT_SQL =
             "SELECT " +
                     "c.id as cliente_id, c.cpf, c.nome, c.data_nascimento, c.categoria, " +
@@ -34,7 +31,6 @@ public class ClienteDao {
                     "FROM cliente c " +
                     "LEFT JOIN endereco e ON c.id_endereco = e.id " +
                     "LEFT JOIN conta cta ON c.id = cta.id_cliente ";
-
     private static final String INSERT_CLIENTE = "INSERT INTO cliente (cpf, nome, data_nascimento, categoria, id_endereco) VALUES (?, ?, ?, ?, ?)";
     private static final String SELECT_BY_ID = BASE_SELECT_SQL + "WHERE c.id = ?";
     private static final String SELECT_ALL = BASE_SELECT_SQL + "ORDER BY c.id";
@@ -48,7 +44,6 @@ public class ClienteDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // O método salvar não precisa de alterações.
     public void salvar(Cliente cliente) {
         Objects.requireNonNull(cliente, "O objeto cliente não pode ser nulo.");
         Objects.requireNonNull(cliente.getEndereco(), "O endereço do cliente não pode ser nulo.");
@@ -71,11 +66,6 @@ public class ClienteDao {
         }
     }
 
-    /**
-     * Busca um cliente por ID e carrega sua lista de contas associadas usando uma única query.
-     * @param id O ID do cliente.
-     * @return um Optional contendo o Cliente completo.
-     */
     public Optional<Cliente> buscarPorId(Integer id) {
         try {
             List<Cliente> clientes = jdbcTemplate.query(SELECT_BY_ID, new ClienteResultSetExtractor(), id);
@@ -86,10 +76,6 @@ public class ClienteDao {
         }
     }
 
-    /**
-     * Lista todos os clientes e suas contas usando uma única query otimizada.
-     * @return Uma lista de todos os clientes com suas contas.
-     */
     public List<Cliente> listarTodos() {
         try {
             return jdbcTemplate.query(SELECT_ALL, new ClienteResultSetExtractor());
@@ -99,7 +85,6 @@ public class ClienteDao {
         }
     }
 
-    // O método de atualização permanece focado no cliente.
     public void atualizar(Cliente cliente) {
         Objects.requireNonNull(cliente, "O objeto cliente não pode ser nulo.");
         Objects.requireNonNull(cliente.getId(), "O ID do cliente não pode ser nulo para atualização.");
@@ -128,7 +113,6 @@ public class ClienteDao {
         }
     }
 
-    // O método de deleção não muda.
     public void deletar(Integer id) {
         Objects.requireNonNull(id, "O ID para deleção não pode ser nulo.");
         try {
@@ -143,20 +127,15 @@ public class ClienteDao {
         }
     }
 
-    /**
-     * Usa o padrão ResultSetExtractor para mapear um resultado de múltiplas linhas (com JOINs)
-     * em uma lista de objetos Cliente, onde cada cliente contém sua lista de Contas.
-     */
     private static class ClienteResultSetExtractor implements ResultSetExtractor<List<Cliente>> {
         @Override
         public List<Cliente> extractData(ResultSet rs) throws SQLException, DataAccessException {
-            Map<Integer, Cliente> clienteMap = new LinkedHashMap<>(); // Mantém a ordem de inserção
+            Map<Integer, Cliente> clienteMap = new LinkedHashMap<>();
 
             while (rs.next()) {
                 Integer clienteId = rs.getInt("cliente_id");
                 Cliente cliente = clienteMap.get(clienteId);
 
-                // Se é a primeira vez que vemos este cliente, criamos o objeto principal
                 if (cliente == null) {
                     cliente = new Cliente();
                     cliente.setId(clienteId);
@@ -170,7 +149,6 @@ public class ClienteDao {
                     }
                     cliente.setContas(new ArrayList<>());
 
-                    // Mapeia o Endereco (apenas se existir, devido ao LEFT JOIN)
                     if (rs.getInt("endereco_id") != 0) {
                         Endereco endereco = new Endereco();
                         endereco.setId(rs.getInt("endereco_id"));
@@ -185,7 +163,6 @@ public class ClienteDao {
                     clienteMap.put(clienteId, cliente);
                 }
 
-                // Mapeia a Conta (apenas se existir, devido ao LEFT JOIN)
                 if (rs.getInt("conta_id") != 0) {
                     String tipoConta = rs.getString("tipo_conta");
                     Conta conta;
@@ -199,7 +176,7 @@ public class ClienteDao {
                         cp.setTaxaRendimentoMensal(rs.getDouble("taxa_rendimento_mensal"));
                         conta = cp;
                     } else {
-                        continue; // Ignora se o tipo de conta for nulo ou desconhecido
+                        continue;
                     }
 
                     conta.setId(rs.getInt("conta_id"));
