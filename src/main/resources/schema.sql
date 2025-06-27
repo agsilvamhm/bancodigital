@@ -48,3 +48,33 @@ CREATE TABLE movimentacao (
     CONSTRAINT mov_conta_origem_fk FOREIGN KEY (id_conta_origem) REFERENCES conta(id),
     CONSTRAINT mov_conta_destino_fk FOREIGN KEY (id_conta_destino) REFERENCES conta(id)
 );
+
+CREATE TABLE cartao (
+    id SERIAL PRIMARY KEY,
+    id_conta INT NOT NULL,
+    numero VARCHAR(19) NOT NULL UNIQUE,
+    nome_titular VARCHAR(255) NOT NULL,
+    data_validade DATE NOT NULL,
+    cvv VARCHAR(4) NOT NULL,
+    senha VARCHAR(255) NOT NULL, -- Em uma aplicação real, armazene um hash da senha
+    tipo_cartao VARCHAR(20) NOT NULL, -- 'CREDITO' ou 'DEBITO'
+    limite_credito DECIMAL(10, 2), -- Nulo se for débito
+    limite_diario_debito DECIMAL(10, 2), -- Nulo se for crédito
+    ativo BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_conta FOREIGN KEY (id_conta) REFERENCES conta(id)
+);
+
+-- Tabela para apólices de seguro de cartão de crédito
+CREATE TABLE seguro_cartao (
+    id SERIAL PRIMARY KEY,
+    id_cartao INT NOT NULL UNIQUE,
+    numero_apolice VARCHAR(50) NOT NULL UNIQUE,
+    data_contratacao TIMESTAMP NOT NULL,
+    cobertura TEXT NOT NULL,
+    condicoes TEXT NOT NULL,
+    valor_premio DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT fk_cartao_credito FOREIGN KEY (id_cartao) REFERENCES cartao(id)
+);
+
+-- Índices para otimizar consultas
+CREATE INDEX idx_cartao_id_conta ON cartao(id_conta);
