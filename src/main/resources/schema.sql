@@ -24,27 +24,20 @@ CREATE TABLE conta (
     agencia VARCHAR(10) NOT NULL,
     saldo DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     id_cliente INT NOT NULL,
-
-    -- Coluna para diferenciar os tipos de conta
-    tipo_conta VARCHAR(20) NOT NULL, -- 'CORRENTE' ou 'POUPANCA'
-
-    -- Colunas específicas (podem ser nulas dependendo do tipo)
-    taxa_manutencao_mensal DECIMAL(10, 2), -- Apenas para Conta Corrente
-    taxa_rendimento_mensal DECIMAL(5, 4),   -- Apenas para Conta Poupança
-
+    tipo_conta VARCHAR(20) NOT NULL,
+    taxa_manutencao_mensal DECIMAL(10, 2),
+    taxa_rendimento_mensal DECIMAL(5, 4),
     CONSTRAINT conta_cliente_fk FOREIGN KEY (id_cliente) REFERENCES cliente(id)
 );
 
--- Tabela para registrar todas as movimentações
 CREATE TABLE movimentacao (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    tipo VARCHAR(50) NOT NULL, -- 'DEPOSITO', 'SAQUE', 'PIX', etc.
+    tipo VARCHAR(50) NOT NULL,
     valor DECIMAL(15, 2) NOT NULL,
     data_hora DATETIME NOT NULL,
     id_conta_origem INT,
     id_conta_destino INT,
     descricao VARCHAR(255),
-
     CONSTRAINT mov_conta_origem_fk FOREIGN KEY (id_conta_origem) REFERENCES conta(id),
     CONSTRAINT mov_conta_destino_fk FOREIGN KEY (id_conta_destino) REFERENCES conta(id)
 );
@@ -56,15 +49,14 @@ CREATE TABLE cartao (
     nome_titular VARCHAR(255) NOT NULL,
     data_validade DATE NOT NULL,
     cvv VARCHAR(4) NOT NULL,
-    senha VARCHAR(255) NOT NULL, -- Em uma aplicação real, armazene um hash da senha
-    tipo_cartao VARCHAR(20) NOT NULL, -- 'CREDITO' ou 'DEBITO'
-    limite_credito DECIMAL(10, 2), -- Nulo se for débito
-    limite_diario_debito DECIMAL(10, 2), -- Nulo se for crédito
+    senha VARCHAR(255) NOT NULL,
+    tipo_cartao VARCHAR(20) NOT NULL,
+    limite_credito DECIMAL(10, 2),
+    limite_diario_debito DECIMAL(10, 2),
     ativo BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_conta FOREIGN KEY (id_conta) REFERENCES conta(id)
 );
 
--- Tabela para apólices de seguro de cartão de crédito
 CREATE TABLE seguro_cartao (
     id SERIAL PRIMARY KEY,
     id_cartao INT NOT NULL UNIQUE,
@@ -76,5 +68,4 @@ CREATE TABLE seguro_cartao (
     CONSTRAINT fk_cartao_credito FOREIGN KEY (id_cartao) REFERENCES cartao(id)
 );
 
--- Índices para otimizar consultas
 CREATE INDEX idx_cartao_id_conta ON cartao(id_conta);

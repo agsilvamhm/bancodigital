@@ -32,6 +32,13 @@ classDiagram
     -CategoriaCliente categoria 
     -List~Conta~ contas 
   }
+
+  class CategoriaCliente {
+      <<enumeration>>
+      COMUM
+      SUPER
+      PREMIUM
+  }
   
   class Endereco {
     -Integer id
@@ -51,17 +58,15 @@ classDiagram
     #double saldo
     #Cliente cliente
     #List~Movimentacao~ movimentacoes
-    +aplicarOperacoesMensais()*
+    #List~Cartao~ cartoes
   }
 
   class ContaCorrente {
     -double taxaManutencaoMensal
-    +aplicarOperacoesMensais()
   }
 
   class ContaPoupanca {
     -double taxaRendimentoMensal
-    +aplicarOperacoesMensais()
   }
 
   class Movimentacao {
@@ -84,13 +89,46 @@ classDiagram
       R_PIX
   }
 
+  class Cartao {
+    -Integer id
+    -Conta conta
+    -String numero
+    -String nomeTitular
+    -LocalDate dataValidade
+    -String cvv
+    -String senha
+    -TipoCartao tipoCartao
+    -BigDecimal limiteCredito
+    -BigDecimal limiteDiarioDebito
+    -boolean ativo
+  }
+
+  class TipoCartao {
+    <<enumeration>>
+    CREDITO
+    DEBITO
+  }
+
+  class SeguroCartao {
+    -Integer id
+    -Cartao cartao
+    -String numeroApolice
+    -LocalDateTime dataContratacao
+    -String cobertura
+    -String condicoes
+    -BigDecimal valorPremio
+  }
+
   Cliente "1" -- "1" Endereco : possui
-  Cliente "1" -- "0..N" Conta : possui
-  Conta <|-- ContaCorrente : extends
-  Conta <|-- ContaPoupanca : extends
+  Cliente "1" -- "1" CategoriaCliente : é da categoria
+  Cliente "1" -- "1..N" Conta : possui
+  Conta <|-- ContaCorrente
+  Conta <|-- ContaPoupanca
   Conta "1" -- "0..N" Movimentacao : registra
+  Conta "1" -- "0..N" Cartao : possui
   Movimentacao "1" -- "1" TipoMovimentacao : é do tipo
-  
+  Cartao "1" -- "1" TipoCartao : é do tipo
+  Cartao "1" -- "0..1" SeguroCartao : pode ter  
 ```
 
 ## Fluxo de Camadas (Visão Estrutural)
