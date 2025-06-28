@@ -14,8 +14,7 @@ public class ContaPoupanca extends Conta {
 
     // Getters e Setters...
 
-    @Override
-    public void aplicarOperacoesMensais() {
+   public void aplicarOperacoesMensais() {
         // Lógica para creditar o rendimento ao saldo
         double rendimento = getSaldo() * this.taxaRendimentoMensal;
         double saldoAtual = getSaldo();

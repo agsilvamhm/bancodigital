@@ -13,10 +13,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,35 +27,27 @@ public class ContaDao {
     private final JdbcTemplate jdbcTemplate;
     private final ContaRowMapper contaRowMapper = new ContaRowMapper();
 
-    // Query base que une conta, cliente e endereço para carregar o objeto completo
     private static final String BASE_SELECT_SQL =
             "SELECT " +
                     "cta.id as conta_id, cta.numero, cta.agencia, cta.saldo, cta.tipo_conta, " +
-                    "cta.taxa_manutencao_mensal, cta.taxa_rendimento_mensal, " +
                     "cli.id as cliente_id, cli.cpf, cli.nome, cli.data_nascimento, cli.categoria, " +
                     "end.id as endereco_id, end.rua, end.numero as endereco_numero, end.complemento, end.cidade, end.estado, end.cep " +
                     "FROM conta cta " +
                     "JOIN cliente cli ON cta.id_cliente = cli.id " +
                     "JOIN endereco end ON cli.id_endereco = end.id ";
 
-    private static final String INSERT_CONTA =
-            "INSERT INTO conta (numero, agencia, saldo, id_cliente, tipo_conta, taxa_manutencao_mensal, taxa_rendimento_mensal) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-
+    private static final String INSERT_CONTA = "INSERT INTO conta (numero, agencia, saldo, id_cliente, tipo_conta) VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_CONTA_SALDO = "UPDATE conta SET saldo = ? WHERE id = ?";
     private static final String SELECT_BY_ID = BASE_SELECT_SQL + "WHERE cta.id = ?";
     private static final String SELECT_BY_CLIENTE_ID = BASE_SELECT_SQL + "WHERE cta.id_cliente = ?";
+    private static final String SELECT_ALL_CORRENTE = BASE_SELECT_SQL + "WHERE cta.tipo_conta = 'CORRENTE'";
+    private static final String SELECT_ALL_POUPANCA = BASE_SELECT_SQL + "WHERE cta.tipo_conta = 'POUPANCA'";
 
     @Autowired
     public ContaDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /**
-     * Salva uma nova conta (Corrente ou Poupança) no banco de dados.
-     * @param conta O objeto Conta a ser salvo.
-     * @return O ID da conta gerado pelo banco de dados.
-     */
     public Integer salvar(Conta conta) {
         Objects.requireNonNull(conta, "O objeto conta não pode ser nulo.");
         Objects.requireNonNull(conta.getCliente(), "O cliente da conta não pode ser nulo.");
@@ -72,15 +62,10 @@ public class ContaDao {
                 ps.setDouble(3, conta.getSaldo());
                 ps.setInt(4, conta.getCliente().getId());
 
-                // Lógica para tratar os diferentes tipos de conta
                 if (conta instanceof ContaCorrente) {
                     ps.setString(5, "CORRENTE");
-                    ps.setDouble(6, ((ContaCorrente) conta).getTaxaManutencaoMensal());
-                    ps.setNull(7, java.sql.Types.DECIMAL); // Taxa de rendimento é nula para conta corrente
                 } else if (conta instanceof ContaPoupanca) {
                     ps.setString(5, "POUPANCA");
-                    ps.setNull(6, java.sql.Types.DECIMAL); // Taxa de manutenção é nula para conta poupança
-                    ps.setDouble(7, ((ContaPoupanca) conta).getTaxaRendimentoMensal());
                 } else {
                     throw new IllegalArgumentException("Tipo de conta não suportado: " + conta.getClass().getName());
                 }
@@ -120,43 +105,55 @@ public class ContaDao {
 
     public void atualizarSaldo(Integer idConta, double novoSaldo) {
         try {
-            jdbcTemplate.update(UPDATE_CONTA_SALDO, novoSaldo, idConta);
+            int rowsAffected = jdbcTemplate.update(UPDATE_CONTA_SALDO, novoSaldo, idConta);
+            if(rowsAffected == 0){
+                logger.warn("Nenhuma linha afetada ao tentar atualizar saldo da conta ID: {}", idConta);
+            }
         } catch (DataAccessException ex) {
             logger.error("Erro de acesso a dados ao atualizar saldo da conta ID: {}", idConta, ex);
             throw new RepositorioException("Erro ao atualizar saldo da conta.", ex);
         }
     }
 
-    /**
-     * RowMapper customizado que sabe como instanciar ContaCorrente ou ContaPoupanca
-     * com base na coluna 'tipo_conta' do banco de dados.
-     */
+    public List<ContaCorrente> buscarTodasContasCorrentes() {
+        return jdbcTemplate.query(SELECT_ALL_CORRENTE, rs -> {
+            List<ContaCorrente> contas = new ArrayList<>();
+            while (rs.next()) {
+                contas.add((ContaCorrente) contaRowMapper.mapRow(rs, rs.getRow()));
+            }
+            return contas;
+        });
+    }
+
+    public List<ContaPoupanca> buscarTodasContasPoupanca() {
+        return jdbcTemplate.query(SELECT_ALL_POUPANCA, rs -> {
+            List<ContaPoupanca> contas = new ArrayList<>();
+            while (rs.next()) {
+                contas.add((ContaPoupanca) contaRowMapper.mapRow(rs, rs.getRow()));
+            }
+            return contas;
+        });
+    }
+
     private static class ContaRowMapper implements RowMapper<Conta> {
         @Override
         public Conta mapRow(ResultSet rs, int rowNum) throws SQLException {
             String tipoConta = rs.getString("tipo_conta");
             Conta conta;
 
-            // Decide qual classe instanciar
             if ("CORRENTE".equals(tipoConta)) {
-                ContaCorrente cc = new ContaCorrente();
-                cc.setTaxaManutencaoMensal(rs.getDouble("taxa_manutencao_mensal"));
-                conta = cc;
+                conta = new ContaCorrente();
             } else if ("POUPANCA".equals(tipoConta)) {
-                ContaPoupanca cp = new ContaPoupanca();
-                cp.setTaxaRendimentoMensal(rs.getDouble("taxa_rendimento_mensal"));
-                conta = cp;
+                conta = new ContaPoupanca();
             } else {
                 throw new SQLException("Tipo de conta desconhecido no banco de dados: " + tipoConta);
             }
 
-            // Mapeia os campos comuns da Conta
             conta.setId(rs.getInt("conta_id"));
             conta.setNumero(rs.getString("numero"));
             conta.setAgencia(rs.getString("agencia"));
             conta.setSaldo(rs.getDouble("saldo"));
 
-            // Mapeia o Cliente e o Endereço aninhados
             Endereco endereco = new Endereco();
             endereco.setId(rs.getInt("endereco_id"));
             endereco.setRua(rs.getString("rua"));
@@ -170,17 +167,17 @@ public class ContaDao {
             cliente.setId(rs.getInt("cliente_id"));
             cliente.setCpf(rs.getString("cpf"));
             cliente.setNome(rs.getString("nome"));
-            if (rs.getDate("data_nascimento") != null) {
-                cliente.setDataNascimento(rs.getDate("data_nascimento").toLocalDate());
+            Date dataNascimento = rs.getDate("data_nascimento");
+            if (dataNascimento != null) {
+                cliente.setDataNascimento(dataNascimento.toLocalDate());
             }
-            if (rs.getString("categoria") != null) {
-                cliente.setCategoria(CategoriaCliente.valueOf(rs.getString("categoria")));
+            String categoria = rs.getString("categoria");
+            if (categoria != null) {
+                cliente.setCategoria(CategoriaCliente.valueOf(categoria.toUpperCase()));
             }
             cliente.setEndereco(endereco);
 
-            // Associa o cliente à conta
             conta.setCliente(cliente);
-
             return conta;
         }
     }

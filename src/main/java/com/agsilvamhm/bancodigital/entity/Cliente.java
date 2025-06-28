@@ -1,13 +1,28 @@
 package com.agsilvamhm.bancodigital.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.br.CPF;
+
 import java.time.LocalDate;
 import java.util.List;
 
 public class Cliente {
     private Integer id;
+    @CPF(message = "CPF inválido.")
     private String cpf;
+    @NotNull(message = "O nome não pode ser nulo.")
+    @Size(min = 2, max = 100, message = "O nome deve ter entre {min} e {max} caracteres.")
+    @Pattern(regexp = "^[A-Za-zÀ-ÖØ-öø-ÿ ]+$", message = "O nome deve conter apenas letras e espaços.")
     private String nome;
+    @NotNull(message = "A data de nascimento é obrigatória.")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate dataNascimento;
+    @NotNull(message = "O endereço é obrigatório.")
+    @Valid
     private Endereco endereco;
     private CategoriaCliente categoria;
     private List<Conta> contas;

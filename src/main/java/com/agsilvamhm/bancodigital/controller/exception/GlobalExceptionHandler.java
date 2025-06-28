@@ -5,19 +5,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler extends RuntimeException{
+public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        logger.warn("Erro de validação na requisição para {}: {}", request.getRequestURI(), ex.getMessage());
+
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            fieldErrors.put(fieldName, errorMessage);
+        });
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Erro de Validação");
+        body.put("message", fieldErrors);
+        body.put("path", request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
 
     @ExceptionHandler(CpfDuplicadoException.class)
     public ResponseEntity<Map<String, Object>> handleCpfDuplicado(CpfDuplicadoException ex, HttpServletRequest request) {
@@ -27,7 +50,7 @@ public class GlobalExceptionHandler extends RuntimeException{
         body.put("status", HttpStatus.CONFLICT.value());
         body.put("error", "Conflito de Dados");
         body.put("message", ex.getMessage());
-        body.put("path", request.getRequestURI()); // Melhoria: caminho dinâmico
+        body.put("path", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
@@ -43,52 +66,28 @@ public class GlobalExceptionHandler extends RuntimeException{
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<Map<String, Object>> handlerNotFoundException(NoSuchElementException ex, HttpServletRequest request) {
-        logger.warn("Elemento não encontrado: {}", ex.getMessage());
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "Recurso Não Encontrado");
-        body.put("message", "O recurso solicitado não foi encontrado."); // Mensagem genérica para o cliente
-        body.put("path", request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
-        logger.warn("Tentativa de acesso negado ao recurso {}: {}", request.getRequestURI(), ex.getMessage());
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.FORBIDDEN.value());
-        body.put("error", "Acesso Negado");
-        body.put("message", "Você não tem permissão para acessar este recurso.");
-        body.put("path", request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
-    }
-
-    @ExceptionHandler(EntidadeNaoEncontradaException.class)
-    public ResponseEntity<Map<String, Object>> handleRegistroNaoEncontradoException(EntidadeNaoEncontradaException ex, HttpServletRequest request) {
-        logger.warn("Entidade não encontrada: {}", ex.getMessage());
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "Registro Não Encontrado");
-        body.put("message", ex.getMessage());
-        body.put("path", request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-    }
-
     @ExceptionHandler(CpfInvalidoException.class)
-    public ResponseEntity<Map<String, Object>> handleRegistroNaoEncontradoException(CpfInvalidoException ex, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> handleCpfInvalidoException(CpfInvalidoException ex, HttpServletRequest request) {
         logger.warn("CPF Inválido: {}", ex.getMessage());
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "CPF inválido");
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Dados Inválidos");
         body.put("message", ex.getMessage());
         body.put("path", request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        logger.warn("Falha ao ler o corpo da requisição para {}: {}", request.getRequestURI(), ex.getMessage());
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Requisição Malformada");
+        body.put("message", "O corpo da requisição não pôde ser lido. Verifique se o formato dos dados (especialmente datas como dd/MM/yyyy) está correto.");
+        body.put("path", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(Throwable.class)

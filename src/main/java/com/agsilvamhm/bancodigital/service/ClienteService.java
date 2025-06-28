@@ -1,7 +1,6 @@
 package com.agsilvamhm.bancodigital.service;
 
 import com.agsilvamhm.bancodigital.controller.exception.CpfDuplicadoException;
-import com.agsilvamhm.bancodigital.controller.exception.CpfInvalidoException;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
 import com.agsilvamhm.bancodigital.dao.EnderecoDao;
@@ -36,11 +35,14 @@ public class ClienteService {
     public Cliente criarCliente(Cliente cliente) {
         Objects.requireNonNull(cliente, "O objeto cliente não pode ser nulo.");
         Objects.requireNonNull(cliente.getEndereco(), "O cliente deve possuir um endereço.");
-        validarCliente(cliente);
 
         try {
-
             Endereco endereco = cliente.getEndereco();
+
+            String cepFormatado = endereco.getCep();
+            String cepLimpo = cepFormatado.replaceAll("[^0-9]", "");
+            endereco.setCep(cepLimpo);
+
             Integer idEndereco = enderecoDao.salvar(endereco);
             endereco.setId(idEndereco);
 
@@ -50,7 +52,6 @@ public class ClienteService {
             return cliente;
         } catch (CpfDuplicadoException | RepositorioException ex) {
             logger.error("Serviço: Erro ao tentar criar cliente com CPF {}: {}", cliente.getCpf(), ex.getMessage());
-
             throw ex;
         }
     }
@@ -58,7 +59,6 @@ public class ClienteService {
     public Cliente buscarPorId(Integer id) {
         Objects.requireNonNull(id, "O ID do cliente não pode ser nulo.");
         logger.debug("Serviço: Buscando cliente com ID: {}", id);
-
         return clienteDao.buscarPorId(id)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente com ID " + id + " não encontrado."));
     }
@@ -74,9 +74,6 @@ public class ClienteService {
         Objects.requireNonNull(clienteAtualizado, "O objeto cliente não pode ser nulo.");
 
         Cliente clienteExistente = buscarPorId(id);
-
-        validarCliente(clienteAtualizado);
-
         Endereco enderecoParaAtualizar = clienteAtualizado.getEndereco();
 
         enderecoParaAtualizar.setId(clienteExistente.getEndereco().getId());
@@ -99,56 +96,9 @@ public class ClienteService {
         Objects.requireNonNull(id, "O ID do cliente não pode ser nulo.");
 
         Cliente cliente = buscarPorId(id);
-
         Integer idEndereco = cliente.getEndereco().getId();
-
         clienteDao.deletar(id);
-
         enderecoDao.deletar(idEndereco);
-
         logger.info("Serviço: Cliente com ID {} e endereço associado ID {} foram deletados com sucesso.", id, idEndereco);
-    }
-
-    private void validarCliente(Cliente cliente) {
-        if (cliente.getNome() == null || cliente.getNome().trim().isEmpty()) {
-            throw new IllegalArgumentException("O nome do cliente não pode ser vazio.");
-        }
-        if(!validarCpf(cliente.getCpf())){
-            throw new CpfInvalidoException("CPF inválido!");
-        }
-    }
-
-    private boolean validarCpf(String cpf){
-        cpf = cpf.replaceAll("[^0-9]", "");
-        if (cpf.length() != 11) {
-            return false;
-        }
-
-        if (cpf.matches("(\\d)\\1{10}")) {
-            return false;
-        }
-
-        int soma = 0;
-        for (int i = 0; i < 9; i++) {
-            soma += (cpf.charAt(i) - '0') * (10 - i);
-        }
-        int resto = 11 - (soma % 11);
-        int digito1 = (resto >= 10) ? 0 : resto;
-
-        if ((cpf.charAt(9) - '0') != digito1) {
-            return false;
-        }
-
-        soma = 0;
-        for (int i = 0; i < 10; i++) {
-            soma += (cpf.charAt(i) - '0') * (11 - i);
-        }
-        resto = 11 - (soma % 11);
-        int digito2 = (resto >= 10) ? 0 : resto;
-
-        if ((cpf.charAt(10) - '0') != digito2) {
-            return false;
-        }
-        return true;
     }
 }

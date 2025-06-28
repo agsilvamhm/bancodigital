@@ -11,9 +11,7 @@ public class ContaCorrente extends Conta {
     public void setTaxaManutencaoMensal(double taxaManutencaoMensal) {
         this.taxaManutencaoMensal = taxaManutencaoMensal;
     }
-// Getters e Setters...
 
-    @Override
     public void aplicarOperacoesMensais() {
         // Lógica para descontar a taxa de manutenção do saldo
         double saldoAtual = getSaldo();

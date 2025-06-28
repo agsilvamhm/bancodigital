@@ -1,5 +1,8 @@
 package com.agsilvamhm.bancodigital.entity;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 public class Endereco {
     private Integer id;
     private String rua;
@@ -7,6 +10,8 @@ public class Endereco {
     private String complemento;
     private String cidade;
     private String estado;
+    @NotBlank(message = "O CEP é obrigatório.")
+    @Pattern(regexp = "^\\d{5}-\\d{3}$", message = "Formato de CEP inválido. Utilize o formato xxxxx-xxx.")
     private String cep;
 
     public Integer getId() {
@@ -64,8 +69,4 @@ public class Endereco {
     public void setCep(String cep) {
         this.cep = cep;
     }
-
-
 }
-
-

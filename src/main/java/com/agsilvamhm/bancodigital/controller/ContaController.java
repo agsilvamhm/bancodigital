@@ -1,7 +1,12 @@
 package com.agsilvamhm.bancodigital.controller;
 
+import com.agsilvamhm.bancodigital.component.ProcessamentoMensalScheduler;
 import com.agsilvamhm.bancodigital.entity.Conta;
+import com.agsilvamhm.bancodigital.entity.ContaCorrente;
+import com.agsilvamhm.bancodigital.entity.ContaPoupanca;
 import com.agsilvamhm.bancodigital.service.ContaService;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -10,34 +15,28 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-/**
- * Controlador REST para gerenciar operações relacionadas a Contas.
- *
- * Expõe endpoints para criar, buscar, listar, atualizar e deletar contas,
- * com acesso restrito a usuários com a autoridade 'SCOPE_ADMIN'.
- */
 @RestController
 @RequestMapping(value = "/api/v1/contas")
 public class ContaController {
 
     private final ContaService contaService;
+    private final ProcessamentoMensalScheduler processamentoScheduler;
 
-    /**
-     * Construtor para injeção de dependência do ContaService.
-     * @param contaService O serviço que encapsula a lógica de negócio para contas.
-     */
-    public ContaController(ContaService contaService) {
+    public ContaController(ContaService contaService, ProcessamentoMensalScheduler processamentoScheduler) {
         this.contaService = contaService;
+        this.processamentoScheduler = processamentoScheduler;
     }
 
-    /**
-     * Cria uma nova conta.
-     * @param conta O objeto Conta a ser criado, fornecido no corpo da requisição.
-     * @return ResponseEntity com status 201 (Created), o cabeçalho Location da nova conta e o objeto criado no corpo.
-     */
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tipo")
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = ContaCorrente.class, name = "CORRENTE"),
+            @JsonSubTypes.Type(value = ContaPoupanca.class, name = "POUPANCA")
+    })
+    abstract class ContaPolimorfica extends Conta {}
+
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<Conta> criarConta(@RequestBody Conta conta) {
+    public ResponseEntity<Conta> criarConta(@RequestBody ContaPolimorfica conta) {
         Conta novaConta = contaService.criarConta(conta);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -47,11 +46,6 @@ public class ContaController {
         return ResponseEntity.created(location).body(novaConta);
     }
 
-    /**
-     * Busca uma conta pelo seu ID.
-     * @param id O ID da conta a ser buscada.
-     * @return ResponseEntity com status 200 (OK) e a conta encontrada no corpo.
-     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Conta> buscarPorId(@PathVariable Integer id) {
@@ -59,16 +53,24 @@ public class ContaController {
         return ResponseEntity.ok(conta);
     }
 
-    /**
-     * Lista todas as contas de um cliente específico.
-     * A busca é feita através de um parâmetro na URL, ex: /api/v1/contas?clienteId=1
-     * @param clienteId O ID do cliente para o qual as contas serão listadas.
-     * @return ResponseEntity com status 200 (OK) e uma lista de contas do cliente no corpo.
-     */
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<List<Conta>> buscarContasPorCliente(@RequestParam Integer clienteId) {
         List<Conta> contas = contaService.buscarContasPorCliente(clienteId);
         return ResponseEntity.ok(contas);
+    }
+
+    @PostMapping("/processar-taxas")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<String> dispararProcessamentoTaxas() {
+        processamentoScheduler.processarTaxasDeManutencao();
+        return ResponseEntity.accepted().body("Processamento de taxas iniciado.");
+    }
+
+    @PostMapping("/processar-rendimentos")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<String> dispararProcessamentoRendimentos() {
+        processamentoScheduler.processarRendimentosPoupanca();
+        return ResponseEntity.accepted().body("Processamento de rendimentos iniciado.");
     }
 }

@@ -2,6 +2,7 @@ package com.agsilvamhm.bancodigital.controller;
 
 import com.agsilvamhm.bancodigital.entity.Cliente;
 import com.agsilvamhm.bancodigital.service.ClienteService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class ClienteController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<Cliente> criarCliente(@RequestBody Cliente cliente) {
+    public ResponseEntity<Cliente> criarCliente(@Valid @RequestBody Cliente cliente) {
         Cliente novoCliente = clienteService.criarCliente(cliente);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

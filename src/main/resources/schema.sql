@@ -69,3 +69,27 @@ CREATE TABLE seguro_cartao (
 );
 
 CREATE INDEX idx_cartao_id_conta ON cartao(id_conta);
+
+CREATE TABLE cartao_credito (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_conta INT NOT NULL,
+    numero VARCHAR(16) NOT NULL UNIQUE,
+    validade DATE NOT NULL,
+    cvv VARCHAR(4) NOT NULL,
+    limite_credito DECIMAL(10, 2) NOT NULL,
+    fatura_atual DECIMAL(10, 2) DEFAULT 0.00,
+    possui_seguro_viagem BOOLEAN DEFAULT FALSE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_conta) REFERENCES conta(id)
+);
+
+CREATE TABLE transacao_cartao (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_cartao_credito INT NOT NULL,
+    valor DECIMAL(10, 2) NOT NULL,
+    descricao VARCHAR(255),
+    data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_cartao_credito) REFERENCES cartao_credito(id)
+);
+
+CREATE INDEX idx_transacao_cartao ON transacao_cartao(id_cartao_credito);
