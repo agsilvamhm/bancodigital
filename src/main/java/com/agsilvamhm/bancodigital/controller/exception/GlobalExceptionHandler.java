@@ -78,6 +78,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(RegraNegocioException.class)
+    public ResponseEntity<Map<String, Object>> handleCpfInvalidoException(RegraNegocioException ex, HttpServletRequest request) {
+        logger.warn("Regra de negócio inválido: {}", ex.getMessage());
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Dados Inválidos");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         logger.warn("Falha ao ler o corpo da requisição para {}: {}", request.getRequestURI(), ex.getMessage());
