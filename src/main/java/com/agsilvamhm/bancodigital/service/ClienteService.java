@@ -80,7 +80,7 @@ public class ClienteService {
         enderecoDao.atualizar(enderecoParaAtualizar);
 
         clienteExistente.setNome(clienteAtualizado.getNome());
-        clienteExistente.setCpf(clienteAtualizado.getCpf());
+       // clienteExistente.setCpf(clienteAtualizado.getCpf());
         clienteExistente.setDataNascimento(clienteAtualizado.getDataNascimento());
         clienteExistente.setCategoria(clienteAtualizado.getCategoria());
         clienteExistente.setEndereco(enderecoParaAtualizar); // Associa o endereço atualizado

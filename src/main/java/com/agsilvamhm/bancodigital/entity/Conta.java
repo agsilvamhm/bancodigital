@@ -1,12 +1,33 @@
 package com.agsilvamhm.bancodigital.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 public abstract class Conta {
 
     private Integer id;
     private String numero;
     private String agencia;
     private double saldo;
+    @JsonBackReference
     private Cliente cliente;
+    private double taxa_manutencao_mensal;
+    private double taxa_rendimento_mensal;
+
+    public double getTaxa_manutencao_mensal() {
+        return taxa_manutencao_mensal;
+    }
+
+    public void setTaxa_manutencao_mensal(double taxa_manutencao_mensal) {
+        this.taxa_manutencao_mensal = taxa_manutencao_mensal;
+    }
+
+    public double getTaxa_rendimento_mensal() {
+        return taxa_rendimento_mensal;
+    }
+
+    public void setTaxa_rendimento_mensal(double taxa_rendimento_mensal) {
+        this.taxa_rendimento_mensal = taxa_rendimento_mensal;
+    }
 
     public void debitar(double valor) {
         if (valor <= 0) {

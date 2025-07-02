@@ -2,7 +2,6 @@ package com.agsilvamhm.bancodigital.service;
 
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
-import com.agsilvamhm.bancodigital.dao.ClienteDao;
 import com.agsilvamhm.bancodigital.dao.ContaDao;
 import com.agsilvamhm.bancodigital.entity.Conta;
 import jakarta.transaction.Transactional;
@@ -20,7 +19,6 @@ public class ContaService {
     private static final Logger logger = LoggerFactory.getLogger(ContaService.class);
 
     private final ContaDao contaDao;
-    // Se precisar validar o cliente, poderia injetar o ClienteDao aqui também.
 
     @Autowired
     public ContaService(ContaDao contaDao) {
@@ -32,14 +30,12 @@ public class ContaService {
         Objects.requireNonNull(conta, "O objeto conta não pode ser nulo.");
         validarConta(conta);
 
-        // Validação da existência do cliente (opcional, mas recomendado)
-        // clienteDao.buscarPorId(conta.getCliente().getId()).orElseThrow(...);
-
         try {
             Integer idNovaConta = contaDao.salvar(conta);
-            conta.setId(idNovaConta);
             logger.info("Serviço: Conta ID {} para o cliente ID {} foi criada com sucesso.", idNovaConta, conta.getCliente().getId());
-            return conta;
+
+             return buscarPorId(idNovaConta);
+
         } catch (RepositorioException ex) {
             logger.error("Serviço: Erro ao tentar criar conta: {}", ex.getMessage());
             throw ex;
@@ -64,8 +60,8 @@ public class ContaService {
         if (conta.getAgencia() == null || conta.getAgencia().trim().isEmpty()) {
             throw new IllegalArgumentException("A agência da conta não pode ser vazia.");
         }
-        if (conta.getCliente() == null || conta.getCliente().getId() == null) {
-            throw new IllegalArgumentException("A conta deve estar associada a um cliente com ID válido.");
-        }
+      //  if (conta.getCliente().getId() == null) {
+      //      throw new IllegalArgumentException("A conta deve estar associada a um cliente com ID válido.");
+     //   }
     }
 }

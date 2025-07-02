@@ -1,6 +1,8 @@
 package com.agsilvamhm.bancodigital.controller;
 
 import com.agsilvamhm.bancodigital.component.ProcessamentoMensalScheduler;
+import com.agsilvamhm.bancodigital.dao.ContaNovaDTO;
+import com.agsilvamhm.bancodigital.entity.Cliente;
 import com.agsilvamhm.bancodigital.entity.Conta;
 import com.agsilvamhm.bancodigital.entity.ContaCorrente;
 import com.agsilvamhm.bancodigital.entity.ContaPoupanca;
@@ -27,17 +29,18 @@ public class ContaController {
         this.processamentoScheduler = processamentoScheduler;
     }
 
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tipo")
+   /* @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tipo")
     @JsonSubTypes({
             @JsonSubTypes.Type(value = ContaCorrente.class, name = "CORRENTE"),
             @JsonSubTypes.Type(value = ContaPoupanca.class, name = "POUPANCA")
     })
-    abstract class ContaPolimorfica extends Conta {}
+    abstract class ContaPolimorfica extends Conta {}*/
 
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<Conta> criarConta(@RequestBody ContaPolimorfica conta) {
-        Conta novaConta = contaService.criarConta(conta);
+    public ResponseEntity<Conta> criarConta(@RequestBody ContaNovaDTO conta) {
+        Conta contaParaSalvar = converterDtoParaEntidade(conta);
+        Conta novaConta = contaService.criarConta(contaParaSalvar);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -72,5 +75,33 @@ public class ContaController {
     public ResponseEntity<String> dispararProcessamentoRendimentos() {
         processamentoScheduler.processarRendimentosPoupanca();
         return ResponseEntity.accepted().body("Processamento de rendimentos iniciado.");
+    }
+
+    private Conta converterDtoParaEntidade(ContaNovaDTO dto) {
+        Conta conta;
+
+        // Decide qual tipo de conta instanciar
+        if ("CORRENTE".equalsIgnoreCase(dto.getTipo())) {
+            conta = new ContaCorrente();
+        } else if ("POUPANCA".equalsIgnoreCase(dto.getTipo())) {
+            conta = new ContaPoupanca();
+        } else {
+            throw new IllegalArgumentException("Tipo de conta inválido: " + dto.getTipo());
+        }
+
+        // Copia os dados do DTO para a entidade
+        conta.setNumero(dto.getNumero());
+        conta.setAgencia(dto.getAgencia());
+        conta.setSaldo(dto.getSaldo());
+
+        // A MÁGICA ACONTECE AQUI:
+        // Crie um objeto Cliente "proxy" que contém apenas o ID.
+        // Isso é suficiente para a camada de persistência, pois o ContaDao.salvar
+        // só precisa do ID para a chave estrangeira (id_cliente).
+        Cliente clienteAssociado = new Cliente();
+        clienteAssociado.setId(dto.getClienteId());
+        conta.setCliente(clienteAssociado);
+
+        return conta;
     }
 }

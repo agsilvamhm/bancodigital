@@ -33,10 +33,10 @@ public class ContaDao {
                     "cli.id as cliente_id, cli.cpf, cli.nome, cli.data_nascimento, cli.categoria, " +
                     "end.id as endereco_id, end.rua, end.numero as endereco_numero, end.complemento, end.cidade, end.estado, end.cep " +
                     "FROM conta cta " +
-                    "JOIN cliente cli ON cta.id_cliente = cli.id " +
-                    "JOIN endereco end ON cli.id_endereco = end.id ";
+                    "LEFT JOIN cliente cli ON cta.id_cliente = cli.id " +
+                    "LEFT JOIN endereco end ON cli.id_endereco = end.id ";
 
-    private static final String INSERT_CONTA = "INSERT INTO conta (numero, agencia, saldo, id_cliente, tipo_conta) VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_CONTA = "INSERT INTO conta (numero, agencia, saldo, id_cliente, tipo_conta, taxa_manutencao_mensal, taxa_rendimento_mensal) VALUES (?, ?, ?, ?, ?,?,?)";
     private static final String UPDATE_CONTA_SALDO = "UPDATE conta SET saldo = ? WHERE id = ?";
     private static final String SELECT_BY_ID = BASE_SELECT_SQL + "WHERE cta.id = ?";
     private static final String SELECT_BY_CLIENTE_ID = BASE_SELECT_SQL + "WHERE cta.id_cliente = ?";
@@ -50,7 +50,7 @@ public class ContaDao {
 
     public Integer salvar(Conta conta) {
         Objects.requireNonNull(conta, "O objeto conta não pode ser nulo.");
-        Objects.requireNonNull(conta.getCliente(), "O cliente da conta não pode ser nulo.");
+       // Objects.requireNonNull(conta.getCliente(), "O cliente da conta não pode ser nulo.");
         Objects.requireNonNull(conta.getCliente().getId(), "O ID do cliente da conta não pode ser nulo.");
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -61,6 +61,8 @@ public class ContaDao {
                 ps.setString(2, conta.getAgencia());
                 ps.setDouble(3, conta.getSaldo());
                 ps.setInt(4, conta.getCliente().getId());
+                ps.setDouble(5, conta.getTaxa_manutencao_mensal());
+                ps.setDouble(6, conta.getTaxa_rendimento_mensal());
 
                 if (conta instanceof ContaCorrente) {
                     ps.setString(5, "CORRENTE");
@@ -171,7 +173,7 @@ public class ContaDao {
             if (dataNascimento != null) {
                 cliente.setDataNascimento(dataNascimento.toLocalDate());
             }
-            String categoria = rs.getString("categoria");
+            String categoria = rs.getString("COMUM");
             if (categoria != null) {
                 cliente.setCategoria(CategoriaCliente.valueOf(categoria.toUpperCase()));
             }

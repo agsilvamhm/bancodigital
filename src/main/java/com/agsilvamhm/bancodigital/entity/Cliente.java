@@ -1,6 +1,7 @@
 package com.agsilvamhm.bancodigital.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -25,6 +26,7 @@ public class Cliente {
     @Valid
     private Endereco endereco;
     private CategoriaCliente categoria;
+    @JsonManagedReference
     private List<Conta> contas;
 
     public void setId(Integer id) {

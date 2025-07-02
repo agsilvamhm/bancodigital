@@ -48,7 +48,7 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Cliente> atualizarCliente(@PathVariable Integer id, @RequestBody Cliente cliente) {
         Cliente clienteAtualizado = clienteService.atualizarCliente(id, cliente);
         return ResponseEntity.ok(clienteAtualizado);
