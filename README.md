@@ -214,10 +214,10 @@ graph TD
         D --> E{Conta de destino existe?}
         E -- Não --> F["Lança Erro<br/>(EntidadeNaoEncontradaException)"]
         E -- Sim --> G((Início da Transação))
-        G --> H[1. Adiciona valor ao saldo da conta]
-        H --> I[2. Atualiza a conta no banco (UPDATE)]
+        G --> H["1. Adiciona valor ao saldo da conta"]
+        H --> I["2. Atualiza a conta no banco (UPDATE)"]
         I --> J["3. Cria registro de Movimentacao<br/>(tipo=DEPOSITO, origem=null)"]
-        J --> K[4. Salva a movimentação no banco (INSERT)]
+        J --> K["4. Salva a movimentação no banco (INSERT)"]
         K --> L((Fim da Transação))
     end
 
@@ -225,7 +225,6 @@ graph TD
         L -- Commit --> M(("Sucesso<br/>Retorna 200 OK com 'Recibo'"))
         C --> Z(("Falha<br/>Retorna Erro 422"))
         F --> Z
-        %% Qualquer falha dentro da transação leva ao Rollback
         H -- Falha no DB --> R((Rollback))
         I -- Falha no DB --> R
         J -- Falha no DB --> R
