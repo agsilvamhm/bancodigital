@@ -200,13 +200,40 @@ graph TD
     Controller -- Captura Exceções --> ErrorResponse
 ```
 
-
-## Exemplo de fluxo no mermaid
 ```mermaid
+%% Fluxo da Operação de Depósito
 graph TD
-A[Início] --> B{Decisão?};
-B -- Sim --> C[Ação 1];
-B -- Não --> D[Ação 2];
-C --> E[Fim];
-D --> E;
+    subgraph "Início da Requisição"
+        A[POST /contas/{id}/deposito com DTO(valor)]
+    end
+
+    subgraph "Camada de Serviço (@Transactional)"
+        B{Valor do depósito é positivo?}
+        B -- Não --> C[Lança Erro de Validação<br/>(IllegalArgumentException)]
+        B -- Sim --> D[Busca conta de destino pelo ID]
+        D --> E{Conta de destino existe?}
+        E -- Não --> F[Lança Erro<br/>(EntidadeNaoEncontradaException)]
+        E -- Sim --> G((Início da Transação))
+        G --> H[1. Adiciona valor ao saldo da conta]
+        H --> I[2. Atualiza a conta no banco (UPDATE)]
+        I --> J[3. Cria registro de Movimentacao<br/>(tipo=DEPOSITO, origem=null)]
+        J --> K[4. Salva a movimentação no banco (INSERT)]
+        K --> L((Fim da Transação))
+    end
+
+    subgraph "Fim da Requisição"
+        L -- Commit --> M((Sucesso<br/>Retorna 200 OK com 'Recibo'))
+        C --> Z((Falha<br/>Retorna Erro 422))
+        F --> Z
+        %% Qualquer falha dentro da transação leva ao Rollback
+        H -- Falha no DB --> R((Rollback))
+        I -- Falha no DB --> R
+        J -- Falha no DB --> R
+        K -- Falha no DB --> R
+        R --> Y((Falha<br/>Retorna Erro 500))
+    end
+    
+    style M fill:#d4edda,stroke:#c3e6cb
+    style Z fill:#f8d7da,stroke:#f5c6cb
+    style Y fill:#f8d7da,stroke:#f5c6cb
 ```

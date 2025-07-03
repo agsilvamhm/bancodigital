@@ -8,6 +8,8 @@ import com.agsilvamhm.bancodigital.controller.exception.RegraNegocioException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
 import com.agsilvamhm.bancodigital.model.*;
 import com.agsilvamhm.bancodigital.model.dto.CriarContaRequest;
+import com.agsilvamhm.bancodigital.model.dto.DepositoRequestDTO;
+import com.agsilvamhm.bancodigital.model.dto.OperacaoContaDTO;
 import com.agsilvamhm.bancodigital.model.dto.TransferenciaRequestDTO;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -176,6 +178,71 @@ public class ContaService {
                 request.valor(), contaOrigem.getNumero(), contaDestino.getNumero());
 
         // Retorna o objeto da movimentação como um "recibo" da transação.
+        return movimentacao;
+    }
+
+    @Transactional
+    public Movimentacao realizarDeposito(Long idConta, DepositoRequestDTO request) {
+        // 1. Busca a conta que receberá o depósito.
+        // O método buscarPorId já lança uma exceção se a conta não for encontrada.
+        Conta conta = buscarPorId(idConta);
+
+        // 2. Adiciona o valor ao saldo da conta.
+        BigDecimal novoSaldo = conta.getSaldo().add(request.valor());
+        conta.setSaldo(novoSaldo);
+
+        // 3. Atualiza a conta no banco de dados.
+        contaDao.atualizar(conta);
+
+        // 4. Cria e salva o registro da movimentação de depósito.
+        Movimentacao movimentacao = new Movimentacao();
+        movimentacao.setTipo(TipoMovimentacao.DEPOSITO);
+        movimentacao.setValor(request.valor().doubleValue());
+        movimentacao.setDataHora(LocalDateTime.now());
+        movimentacao.setContaOrigem(null); // Depósitos não têm uma conta de origem no sistema.
+        movimentacao.setContaDestino(conta);
+        movimentacao.setDescricao(request.descricao() != null ? request.descricao() : "Depósito em conta");
+
+        // Reutilizamos o MovimentacaoDao que já existe.
+        movimentacaoDao.salvar(movimentacao);
+
+        logger.info("Depósito de R$ {} na conta #{} realizado com sucesso.", request.valor(), conta.getNumero());
+
+        // Retorna a movimentação como "recibo".
+        return movimentacao;
+    }
+
+    @Transactional
+    public Movimentacao realizarSaque(Long idConta, OperacaoContaDTO request) {
+        // 1. Busca a conta da qual o saque será feito.
+        Conta conta = buscarPorId(idConta);
+
+        // 2. VALIDAÇÃO MAIS IMPORTANTE: Verificar se há saldo suficiente.
+        if (conta.getSaldo().compareTo(request.valor()) < 0) {
+            throw new RegraNegocioException("Saldo insuficiente para realizar o saque.");
+        }
+
+        // 3. Debita o valor do saldo da conta.
+        BigDecimal novoSaldo = conta.getSaldo().subtract(request.valor());
+        conta.setSaldo(novoSaldo);
+
+        // 4. Atualiza a conta no banco de dados.
+        contaDao.atualizar(conta);
+
+        // 5. Cria e salva o registro da movimentação de saque.
+        Movimentacao movimentacao = new Movimentacao();
+        movimentacao.setTipo(TipoMovimentacao.SAQUE); // Certifique-se que seu enum tem SAQUE
+        movimentacao.setValor(request.valor().doubleValue());
+        movimentacao.setDataHora(LocalDateTime.now());
+        movimentacao.setContaOrigem(conta);
+        movimentacao.setContaDestino(null); // Saques não têm conta de destino.
+        movimentacao.setDescricao(request.descricao() != null ? request.descricao() : "Saque em conta");
+
+        // Reutilizamos o MovimentacaoDao. A correção que fizemos para depósitos já o preparou para isso.
+        movimentacaoDao.salvar(movimentacao);
+
+        logger.info("Saque de R$ {} da conta #{} realizado com sucesso.", request.valor(), conta.getNumero());
+
         return movimentacao;
     }
 }

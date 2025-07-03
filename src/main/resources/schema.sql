@@ -58,17 +58,12 @@ CREATE TABLE "movimentacao" (
   "tipo" VARCHAR(20) NOT NULL,
   "valor" DECIMAL(15, 2) NOT NULL,
   "data_hora" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "id_conta_origem" INT NOT NULL,
-  "id_conta_destino" INT, -- Pode ser nulo para saques e depósitos.
+  "id_conta_origem" INT,  -- <-- CORRIGIDO: Removido o NOT NULL
+  "id_conta_destino" INT,
   "descricao" VARCHAR(255),
-  -- Adicionando a restrição CHECK para simular o ENUM
   CONSTRAINT "check_movimentacao_tipo" CHECK ("tipo" IN ('DEPOSITO', 'SAQUE', 'TRANSFERENCIA', 'PIX')),
-  CONSTRAINT "fk_movimentacao_conta_origem"
-    FOREIGN KEY("id_conta_origem")
-    REFERENCES "conta"("id"),
-  CONSTRAINT "fk_movimentacao_conta_destino"
-    FOREIGN KEY("id_conta_destino")
-    REFERENCES "conta"("id")
+  CONSTRAINT "fk_movimentacao_conta_origem" FOREIGN KEY("id_conta_origem") REFERENCES "conta"("id"),
+  CONSTRAINT "fk_movimentacao_conta_destino" FOREIGN KEY("id_conta_destino") REFERENCES "conta"("id")
 );
 
 CREATE TABLE "cartao" (

@@ -2,10 +2,7 @@ package com.agsilvamhm.bancodigital.controller;
 
 import com.agsilvamhm.bancodigital.model.Conta;
 import com.agsilvamhm.bancodigital.model.Movimentacao;
-import com.agsilvamhm.bancodigital.model.dto.ContaInfoDTO;
-import com.agsilvamhm.bancodigital.model.dto.CriarContaRequest;
-import com.agsilvamhm.bancodigital.model.dto.SaldoDTO;
-import com.agsilvamhm.bancodigital.model.dto.TransferenciaRequestDTO;
+import com.agsilvamhm.bancodigital.model.dto.*;
 import com.agsilvamhm.bancodigital.old_component.ProcessamentoMensalScheduler;
 import com.agsilvamhm.bancodigital.service.ContaService;
 import jakarta.validation.Valid;
@@ -53,13 +50,8 @@ public class ContaController {
     // A anotação de segurança pode ser mantida
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<ContaInfoDTO> consultarInfoConta(@PathVariable Long id) {
-        // 1. Em vez de um método específico de saldo, usamos o buscarPorId que já retorna o objeto completo.
         Conta conta = contaService.buscarPorId(id);
-
-        // 2. Usamos o método estático 'fromEntity' para criar o DTO de resposta de forma limpa.
         ContaInfoDTO contaInfoDTO = ContaInfoDTO.fromEntity(conta);
-
-        // 3. Retornamos o novo DTO com status 200 OK.
         return ResponseEntity.ok(contaInfoDTO);
     }
 
@@ -70,6 +62,26 @@ public class ContaController {
             @Valid @RequestBody TransferenciaRequestDTO request) {
 
         Movimentacao recibo = contaService.realizarTransferencia(id, request);
+        return ResponseEntity.ok(recibo);
+    }
+
+    @PostMapping("/{id}/deposito")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')") // Apenas administradores podem simular um depósito
+    public ResponseEntity<Movimentacao> realizarDeposito(
+            @PathVariable Long id,
+            @Valid @RequestBody DepositoRequestDTO request) {
+
+        Movimentacao recibo = contaService.realizarDeposito(id, request);
+        return ResponseEntity.ok(recibo);
+    }
+
+    @PostMapping("/{id}/saque")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or @authService.podeAcessarConta(#id)")
+    public ResponseEntity<Movimentacao> realizarSaque(
+            @PathVariable Long id,
+            @Valid @RequestBody OperacaoContaDTO request) {
+
+        Movimentacao recibo = contaService.realizarSaque(id, request);
         return ResponseEntity.ok(recibo);
     }
 }

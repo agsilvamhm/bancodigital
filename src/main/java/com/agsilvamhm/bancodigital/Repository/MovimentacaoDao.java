@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Objects;
 
 @Repository
@@ -27,20 +28,34 @@ public class MovimentacaoDao {
     public void salvar(Movimentacao movimentacao) {
         Objects.requireNonNull(movimentacao, "Objeto de movimentação não pode ser nulo.");
 
-        // O ID da conta de origem não pode ser nulo em uma transferência
-        Long idOrigem = movimentacao.getContaOrigem().getId();
-        // O ID da conta de destino também não
-        Long idDestino = movimentacao.getContaDestino().getId();
+        // CORREÇÃO: Trata os casos onde a conta de origem ou destino podem ser nulas.
+        // Usamos um operador ternário para isso.
+        Long idOrigem = (movimentacao.getContaOrigem() != null) ? movimentacao.getContaOrigem().getId() : null;
+        Long idDestino = (movimentacao.getContaDestino() != null) ? movimentacao.getContaDestino().getId() : null;
 
-        jdbcTemplate.update(INSERT_MOVIMENTACAO,
+        // Ao usar o jdbcTemplate.update, é uma boa prática especificar os tipos SQL,
+        // especialmente para valores que podem ser nulos.
+        Object[] params = {
                 movimentacao.getTipo().name(),
                 movimentacao.getValor(),
                 Timestamp.valueOf(movimentacao.getDataHora()),
                 idOrigem,
                 idDestino,
                 movimentacao.getDescricao()
-        );
-        logger.info("Movimentação do tipo {} no valor de {} da conta ID {} para a conta ID {} salva com sucesso.",
-                movimentacao.getTipo(), movimentacao.getValor(), idOrigem, idDestino);
+        };
+
+        int[] types = {
+                Types.VARCHAR,
+                Types.DECIMAL,
+                Types.TIMESTAMP,
+                Types.BIGINT, // id_conta_origem
+                Types.BIGINT, // id_conta_destino
+                Types.VARCHAR
+        };
+
+        jdbcTemplate.update(INSERT_MOVIMENTACAO, params, types);
+
+        logger.info("Movimentação do tipo {} no valor de {} salva com sucesso.",
+                movimentacao.getTipo(), movimentacao.getValor());
     }
 }
