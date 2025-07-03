@@ -85,9 +85,7 @@ classDiagram
       SAQUE
       TRANSFERENCIA
       PIX
-      R_TRANSFERENCIA
-      R_PIX
-  }
+   }
 
   class Cartao {
     -Integer id

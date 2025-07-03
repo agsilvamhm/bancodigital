@@ -1,6 +1,6 @@
 package com.agsilvamhm.bancodigital.controller;
 
-import com.agsilvamhm.bancodigital.entity.Cliente;
+import com.agsilvamhm.bancodigital.model.Cliente;
 import com.agsilvamhm.bancodigital.service.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

@@ -1,95 +1,106 @@
-CREATE TABLE endereco(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    rua VARCHAR(50) NOT NULL,
-    numero INT NOT NULL,
-    complemento VARCHAR(50) NOT NULL,
-    cidade VARCHAR(50) NOT NULL,
-    estado VARCHAR(2) NOT NULL,
-    cep VARCHAR(8) NOT NULL
+CREATE TABLE "endereco" (
+  "id" INT AUTO_INCREMENT PRIMARY KEY,
+  "rua" VARCHAR(255) NOT NULL,
+  "numero" INT,
+  "complemento" VARCHAR(100),
+  "cidade" VARCHAR(100) NOT NULL,
+  "estado" VARCHAR(50) NOT NULL,
+  "cep" VARCHAR(9) NOT NULL
 );
 
-CREATE TABLE cliente (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    cpf VARCHAR(11) NOT NULL UNIQUE,
-    nome VARCHAR(255),
-    data_nascimento DATE,
-    categoria VARCHAR(50),
-    id_endereco int,
-    constraint cliente_endereco FOREIGN KEY (id_endereco) REFERENCES endereco(id)
+CREATE TABLE "cliente" (
+  "id" INT AUTO_INCREMENT PRIMARY KEY,
+  "cpf" VARCHAR(14) UNIQUE NOT NULL,
+  "nome" VARCHAR(255) NOT NULL,
+  "data_nascimento" DATE NOT NULL,
+  "categoria" VARCHAR(20) NOT NULL,
+  "id_endereco" INT UNIQUE NOT NULL,
+  -- Adicionando a restrição CHECK para simular o ENUM
+  CONSTRAINT "check_cliente_categoria" CHECK ("categoria" IN ('COMUM', 'SUPER', 'PREMIUM')),
+  CONSTRAINT "fk_cliente_endereco"
+    FOREIGN KEY("id_endereco")
+    REFERENCES "endereco"("id")
+    ON DELETE RESTRICT
 );
 
-CREATE TABLE conta (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    numero VARCHAR(20) NOT NULL UNIQUE,
-    agencia VARCHAR(10) NOT NULL,
-    saldo DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-    id_cliente INT NOT NULL,
-    tipo_conta VARCHAR(20) NOT NULL,
-    taxa_manutencao_mensal DECIMAL(10, 2),
-    taxa_rendimento_mensal DECIMAL(5, 4),
-    CONSTRAINT conta_cliente_fk FOREIGN KEY (id_cliente) REFERENCES cliente(id)
+CREATE TABLE "conta" (
+  "id" INT AUTO_INCREMENT PRIMARY KEY,
+  "numero" VARCHAR(20) UNIQUE NOT NULL,
+  "agencia" VARCHAR(10) NOT NULL,
+  "saldo" DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+  "id_cliente" INT NOT NULL,
+  CONSTRAINT "fk_conta_cliente"
+    FOREIGN KEY("id_cliente")
+    REFERENCES "cliente"("id")
+    ON DELETE CASCADE
 );
 
-CREATE TABLE movimentacao (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    tipo VARCHAR(50) NOT NULL,
-    valor DECIMAL(15, 2) NOT NULL,
-    data_hora DATETIME NOT NULL,
-    id_conta_origem INT,
-    id_conta_destino INT,
-    descricao VARCHAR(255),
-    CONSTRAINT mov_conta_origem_fk FOREIGN KEY (id_conta_origem) REFERENCES conta(id),
-    CONSTRAINT mov_conta_destino_fk FOREIGN KEY (id_conta_destino) REFERENCES conta(id)
+CREATE TABLE "conta_corrente" (
+  "id_conta" INT PRIMARY KEY,
+  "taxa_manutencao_mensal" DECIMAL(10, 2) NOT NULL,
+  CONSTRAINT "fk_cc_conta"
+    FOREIGN KEY("id_conta")
+    REFERENCES "conta"("id")
+    ON DELETE CASCADE
 );
 
-CREATE TABLE cartao (
-    id SERIAL PRIMARY KEY,
-    id_conta INT NOT NULL,
-    numero VARCHAR(19) NOT NULL UNIQUE,
-    nome_titular VARCHAR(255) NOT NULL,
-    data_validade DATE NOT NULL,
-    cvv VARCHAR(4) NOT NULL,
-    senha VARCHAR(255) NOT NULL,
-    tipo_cartao VARCHAR(20) NOT NULL,
-    limite_credito DECIMAL(10, 2),
-    limite_diario_debito DECIMAL(10, 2),
-    ativo BOOLEAN NOT NULL DEFAULT FALSE,
-    CONSTRAINT fk_conta FOREIGN KEY (id_conta) REFERENCES conta(id)
+CREATE TABLE "conta_poupanca" (
+  "id_conta" INT PRIMARY KEY,
+  "taxa_rendimento_mensal" DECIMAL(5, 4) NOT NULL,
+  CONSTRAINT "fk_cp_conta"
+    FOREIGN KEY("id_conta")
+    REFERENCES "conta"("id")
+    ON DELETE CASCADE
 );
 
-CREATE TABLE seguro_cartao (
-    id SERIAL PRIMARY KEY,
-    id_cartao INT NOT NULL UNIQUE,
-    numero_apolice VARCHAR(50) NOT NULL UNIQUE,
-    data_contratacao TIMESTAMP NOT NULL,
-    cobertura TEXT NOT NULL,
-    condicoes TEXT NOT NULL,
-    valor_premio DECIMAL(10, 2) NOT NULL,
-    CONSTRAINT fk_cartao_credito FOREIGN KEY (id_cartao) REFERENCES cartao(id)
+CREATE TABLE "movimentacao" (
+  "id" INT AUTO_INCREMENT PRIMARY KEY,
+  "tipo" VARCHAR(20) NOT NULL,
+  "valor" DECIMAL(15, 2) NOT NULL,
+  "data_hora" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "id_conta_origem" INT NOT NULL,
+  "id_conta_destino" INT, -- Pode ser nulo para saques e depósitos.
+  "descricao" VARCHAR(255),
+  -- Adicionando a restrição CHECK para simular o ENUM
+  CONSTRAINT "check_movimentacao_tipo" CHECK ("tipo" IN ('DEPOSITO', 'SAQUE', 'TRANSFERENCIA', 'PIX')),
+  CONSTRAINT "fk_movimentacao_conta_origem"
+    FOREIGN KEY("id_conta_origem")
+    REFERENCES "conta"("id"),
+  CONSTRAINT "fk_movimentacao_conta_destino"
+    FOREIGN KEY("id_conta_destino")
+    REFERENCES "conta"("id")
 );
 
-CREATE INDEX idx_cartao_id_conta ON cartao(id_conta);
-
-CREATE TABLE cartao_credito (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_conta INT NOT NULL,
-    numero VARCHAR(16) NOT NULL UNIQUE,
-    validade DATE NOT NULL,
-    cvv VARCHAR(4) NOT NULL,
-    limite_credito DECIMAL(10, 2) NOT NULL,
-    fatura_atual DECIMAL(10, 2) DEFAULT 0.00,
-    possui_seguro_viagem BOOLEAN DEFAULT FALSE,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_conta) REFERENCES conta(id)
+CREATE TABLE "cartao" (
+  "id" INT AUTO_INCREMENT PRIMARY KEY,
+  "numero" VARCHAR(19) UNIQUE NOT NULL,
+  "nome_titular" VARCHAR(255) NOT NULL,
+  "data_validade" DATE NOT NULL,
+  "cvv" VARCHAR(4) NOT NULL,
+  "senha" VARCHAR(255) NOT NULL, -- Lembre-se de armazenar a senha de forma segura (hash).
+  "tipo_cartao" VARCHAR(10) NOT NULL,
+  "limite_credito" DECIMAL(10, 2),
+  "limite_diario_debito" DECIMAL(10, 2),
+  "ativo" BOOLEAN NOT NULL DEFAULT true,
+  "id_conta" INT NOT NULL,
+  -- Adicionando a restrição CHECK para simular o ENUM
+  CONSTRAINT "check_cartao_tipo" CHECK ("tipo_cartao" IN ('CREDITO', 'DEBITO')),
+  CONSTRAINT "fk_cartao_conta"
+    FOREIGN KEY("id_conta")
+    REFERENCES "conta"("id")
+    ON DELETE CASCADE
 );
 
-CREATE TABLE transacao_cartao (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_cartao_credito INT NOT NULL,
-    valor DECIMAL(10, 2) NOT NULL,
-    descricao VARCHAR(255),
-    data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_cartao_credito) REFERENCES cartao_credito(id)
+CREATE TABLE "seguro_cartao" (
+  "id" INT AUTO_INCREMENT PRIMARY KEY,
+  "numero_apolice" VARCHAR(50) UNIQUE NOT NULL,
+  "data_contratacao" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "cobertura" CLOB NOT NULL, -- Usando CLOB para textos longos no H2 (equivalente ao TEXT)
+  "condicoes" CLOB,
+  "valor_premio" DECIMAL(10, 2) NOT NULL,
+  "id_cartao" INT UNIQUE NOT NULL,
+  CONSTRAINT "fk_seguro_cartao"
+    FOREIGN KEY("id_cartao")
+    REFERENCES "cartao"("id")
+    ON DELETE CASCADE
 );
-
-CREATE INDEX idx_transacao_cartao ON transacao_cartao(id_cartao_credito);
