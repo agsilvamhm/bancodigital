@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.old_entity;
+package com.agsilvamhm.bancodigital.model;
 
 public enum TipoConta {
     CORRENTE, POUPANCA

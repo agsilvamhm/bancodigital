@@ -1,6 +1,4 @@
-package com.agsilvamhm.bancodigital.old_entity;
-
-import com.agsilvamhm.bancodigital.model.Conta;
+package com.agsilvamhm.bancodigital.model;
 
 import java.time.LocalDateTime;
 

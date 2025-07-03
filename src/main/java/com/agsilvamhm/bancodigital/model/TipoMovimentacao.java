@@ -1,12 +1,10 @@
-package com.agsilvamhm.bancodigital.old_entity;
+package com.agsilvamhm.bancodigital.model;
 
 public enum TipoMovimentacao {
     DEPOSITO(1, "Depósito"),
     SAQUE(-1, "Saque"),
     TRANSFERENCIA(-1, "Transferência"),
-    PIX(-1, "PIX"),
-    R_TRANSFERENCIA(1, "Receber transferência"),
-    R_PIX(1, "Receber PIX"),;
+    PIX(-1, "PIX"),;
 
     private final int operacao;
     private final String descricao;

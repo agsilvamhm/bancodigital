@@ -1,6 +1,5 @@
 package com.agsilvamhm.bancodigital.model;
 
-import com.agsilvamhm.bancodigital.old_entity.TipoConta;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

@@ -2,15 +2,13 @@ package com.agsilvamhm.bancodigital.service;
 
 import com.agsilvamhm.bancodigital.Repository.ClienteDao;
 import com.agsilvamhm.bancodigital.Repository.ContaDao;
+import com.agsilvamhm.bancodigital.Repository.MovimentacaoDao;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RegraNegocioException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
-import com.agsilvamhm.bancodigital.model.Cliente;
-import com.agsilvamhm.bancodigital.model.Conta;
-import com.agsilvamhm.bancodigital.model.ContaCorrente;
-import com.agsilvamhm.bancodigital.model.ContaPoupanca;
+import com.agsilvamhm.bancodigital.model.*;
 import com.agsilvamhm.bancodigital.model.dto.CriarContaRequest;
-import com.agsilvamhm.bancodigital.old_entity.TipoConta;
+import com.agsilvamhm.bancodigital.model.dto.TransferenciaRequestDTO;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,11 +29,13 @@ public class ContaService {
 
     private final ContaDao contaDao;
     private final ClienteDao clienteDao;
+    private final MovimentacaoDao movimentacaoDao;
 
     @Autowired
-    public ContaService(ContaDao contaDao, ClienteDao clienteDao) {
+    public ContaService(ContaDao contaDao, ClienteDao clienteDao, MovimentacaoDao movimentacaoDao) {
         this.contaDao = contaDao;
         this.clienteDao = clienteDao;
+        this.movimentacaoDao = movimentacaoDao;
     }
 
     @Transactional
@@ -119,5 +120,62 @@ public class ContaService {
         if (contaDao.buscarPorNumero(request.numero()).isPresent()) {
             throw new RegraNegocioException("Uma conta com o número '" + request.numero() + "' já existe.");
         }
+    }
+
+    public BigDecimal consultarSaldo(Long id) {
+        logger.info("Consultando saldo para a conta ID: {}", id);
+        // 1. Reutiliza o método buscarPorId que já trata o caso de não encontrar a conta.
+        Conta conta = this.buscarPorId(id);
+
+        // 2. Retorna apenas o saldo do objeto encontrado.
+        return conta.getSaldo();
+    }
+
+    @Transactional
+    public Movimentacao realizarTransferencia(Long idContaOrigem, TransferenciaRequestDTO request) {
+        // 1. Validações de negócio
+        if (request.valor().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RegraNegocioException("O valor da transferência deve ser positivo.");
+        }
+
+        // 2. Busca as contas de origem e destino
+        Conta contaOrigem = buscarPorId(idContaOrigem);
+        Conta contaDestino = contaDao.buscarPorNumero(request.contaDestinoNumero())
+                .orElseThrow(() -> new EntidadeNaoEncontradaException(
+                        "Conta de destino com número " + request.contaDestinoNumero() + " não encontrada."));
+
+        if (contaOrigem.getId().equals(contaDestino.getId())) {
+            throw new RegraNegocioException("A conta de origem e destino não podem ser a mesma.");
+        }
+
+        // 3. Verifica o saldo
+        if (contaOrigem.getSaldo().compareTo(request.valor()) < 0) {
+            throw new RegraNegocioException("Saldo insuficiente na conta de origem.");
+        }
+
+        // 4. Realiza a operação de débito e crédito
+        contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(request.valor()));
+        contaDestino.setSaldo(contaDestino.getSaldo().add(request.valor()));
+
+        // 5. Atualiza as duas contas no banco de dados
+        contaDao.atualizar(contaOrigem);
+        contaDao.atualizar(contaDestino);
+
+        // 6. Cria e salva o registro da movimentação
+        Movimentacao movimentacao = new Movimentacao();
+        movimentacao.setTipo(TipoMovimentacao.TRANSFERENCIA);
+        movimentacao.setValor(request.valor().doubleValue()); // Ajuste de BigDecimal para double
+        movimentacao.setDataHora(LocalDateTime.now());
+        movimentacao.setContaOrigem(contaOrigem);
+        movimentacao.setContaDestino(contaDestino);
+        movimentacao.setDescricao(request.descricao());
+
+        movimentacaoDao.salvar(movimentacao);
+
+        logger.info("Transferência de R$ {} da conta #{} para #{} realizada com sucesso.",
+                request.valor(), contaOrigem.getNumero(), contaDestino.getNumero());
+
+        // Retorna o objeto da movimentação como um "recibo" da transação.
+        return movimentacao;
     }
 }

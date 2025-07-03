@@ -1,6 +1,6 @@
 package com.agsilvamhm.bancodigital.model.dto;
 
-import com.agsilvamhm.bancodigital.old_entity.TipoConta;
+import com.agsilvamhm.bancodigital.model.TipoConta;
 
 public record CriarContaRequest(
         Integer clienteId,
