@@ -16,6 +16,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -307,6 +308,106 @@ public class ContaService {
 
         logger.info("Encontradas {} movimentações para a conta ID: {}", movimentacoes.size(), idConta);
         return movimentacoes;
+    }
+
+    // Dentro da classe ContaService
+// ... (outros imports e métodos) ...
+
+    /**
+     * Aplica a taxa de manutenção mensal a uma conta corrente específica.
+     * A operação é transacional: debita o saldo e cria um registro de movimentação.
+     *
+     * @param idConta O ID da conta corrente.
+     * @return O objeto Movimentacao que representa a cobrança da taxa.
+     * @throws EntidadeNaoEncontradaException se a conta não for encontrada.
+     * @throws RegraNegocioException se a conta não for do tipo ContaCorrente.
+     */
+    @Transactional
+    public Movimentacao aplicarTaxaManutencao(Long idConta) {
+        logger.info("Iniciando aplicação de taxa de manutenção para a conta ID: {}", idConta);
+
+        // 1. Busca a conta. O método buscarPorId já trata o caso de não encontrar.
+        Conta conta = this.buscarPorId(idConta);
+
+        // 2. VALIDAÇÃO: Garante que a operação só ocorra em Contas Corrente.
+        if (!(conta instanceof ContaCorrente)) {
+            throw new RegraNegocioException("A taxa de manutenção só pode ser aplicada a Contas Corrente.");
+        }
+
+        ContaCorrente contaCorrente = (ContaCorrente) conta;
+        BigDecimal taxa = BigDecimal.valueOf(contaCorrente.getTaxaManutencaoMensal());
+
+        // 3. Valida se a taxa tem um valor a ser cobrado
+        if (taxa.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.warn("Taxa de manutenção para a conta #{} é zero ou negativa. Nenhuma operação realizada.", conta.getNumero());
+            // Poderia retornar null ou uma exceção, dependendo da regra de negócio.
+            // Vamos lançar uma exceção para ser mais explícito.
+            throw new RegraNegocioException("O valor da taxa de manutenção é zero ou inválido.");
+        }
+
+        // 4. Debita o valor do saldo
+        contaCorrente.setSaldo(contaCorrente.getSaldo().subtract(taxa));
+        contaDao.atualizar(contaCorrente);
+        logger.info("Saldo da conta #{} atualizado após cobrança de taxa.", conta.getNumero());
+
+        // 5. Cria e salva o registro da movimentação para o extrato
+        Movimentacao movimentacaoTaxa = new Movimentacao();
+        movimentacaoTaxa.setTipo(TipoMovimentacao.TAXA_MANUTENCAO);
+        movimentacaoTaxa.setValor(taxa.doubleValue());
+        movimentacaoTaxa.setDataHora(LocalDateTime.now());
+        movimentacaoTaxa.setDescricao("Cobrança de taxa de manutenção mensal");
+        movimentacaoTaxa.setContaOrigem(contaCorrente); // A própria conta é a origem do débito
+        movimentacaoTaxa.setContaDestino(null);
+
+        movimentacaoDao.salvar(movimentacaoTaxa);
+        logger.info("Movimentação de taxa de manutenção para conta #{} registrada com sucesso.", conta.getNumero());
+
+        return movimentacaoTaxa;
+    }
+
+    @Transactional
+    public Movimentacao aplicarRendimentos(Long idConta) {
+        logger.info("Iniciando aplicação de rendimentos para a conta ID: {}", idConta);
+
+        // 1. Busca a conta.
+        Conta conta = this.buscarPorId(idConta);
+
+        // 2. VALIDAÇÃO: Garante que a operação só ocorra em Contas Poupança.
+        if (!(conta instanceof ContaPoupanca)) {
+            throw new RegraNegocioException("Rendimentos só podem ser aplicados a Contas Poupança.");
+        }
+
+        ContaPoupanca contaPoupanca = (ContaPoupanca) conta;
+        BigDecimal taxaRendimento = BigDecimal.valueOf(contaPoupanca.getTaxaRendimentoMensal());
+
+        // 3. Calcula o valor do rendimento (saldo * taxa)
+        // Usamos BigDecimal para precisão monetária.
+        BigDecimal valorRendimento = contaPoupanca.getSaldo().multiply(taxaRendimento)
+                .setScale(2, RoundingMode.HALF_EVEN); // Arredonda para 2 casas decimais
+
+        if (valorRendimento.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.warn("Rendimento para a conta #{} resultou em zero ou menos. Nenhuma operação realizada.", conta.getNumero());
+            throw new RegraNegocioException("O valor do rendimento calculado é zero ou inválido.");
+        }
+
+        // 4. Credita o valor ao saldo
+        contaPoupanca.setSaldo(contaPoupanca.getSaldo().add(valorRendimento));
+        contaDao.atualizar(contaPoupanca);
+        logger.info("Saldo da conta #{} atualizado após aplicação de rendimentos.", conta.getNumero());
+
+        // 5. Cria e salva o registro da movimentação
+        Movimentacao movimentacaoRendimento = new Movimentacao();
+        movimentacaoRendimento.setTipo(TipoMovimentacao.RENDIMENTO);
+        movimentacaoRendimento.setValor(valorRendimento.doubleValue());
+        movimentacaoRendimento.setDataHora(LocalDateTime.now());
+        movimentacaoRendimento.setDescricao("Crédito de rendimento mensal");
+        movimentacaoRendimento.setContaOrigem(null);
+        movimentacaoRendimento.setContaDestino(contaPoupanca); // A própria conta é o destino do crédito
+
+        movimentacaoDao.salvar(movimentacaoRendimento);
+        logger.info("Movimentação de rendimento para conta #{} registrada com sucesso.", conta.getNumero());
+
+        return movimentacaoRendimento;
     }
 
 }

@@ -3,7 +3,6 @@ package com.agsilvamhm.bancodigital.controller;
 import com.agsilvamhm.bancodigital.model.Conta;
 import com.agsilvamhm.bancodigital.model.Movimentacao;
 import com.agsilvamhm.bancodigital.model.dto.*;
-import com.agsilvamhm.bancodigital.old_component.ProcessamentoMensalScheduler;
 import com.agsilvamhm.bancodigital.service.ContaService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -101,5 +100,19 @@ public class ContaController {
     public ResponseEntity<List<Movimentacao>> listarMovimentacoes(@PathVariable Long id) {
         List<Movimentacao> extrato = contaService.listarMovimentacoesPorConta(id);
         return ResponseEntity.ok(extrato);
+    }
+
+    @PutMapping("/{id}/manutencao")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<Movimentacao> aplicarTaxaManutencao(@PathVariable Long id) {
+        Movimentacao recibo = contaService.aplicarTaxaManutencao(id);
+        return ResponseEntity.ok(recibo);
+    }
+
+    @PutMapping("/{id}/rendimentos")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<Movimentacao> aplicarRendimentos(@PathVariable Long id) {
+        Movimentacao recibo = contaService.aplicarRendimentos(id);
+        return ResponseEntity.ok(recibo);
     }
 }
