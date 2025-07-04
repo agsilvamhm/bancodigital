@@ -12,7 +12,7 @@ public record PixRequestDTO(
         BigDecimal valor,
 
         @NotBlank(message = "A Chave PIX não pode ser vazia.")
-        String chavePix, // Para nosso sistema, será o CPF do destinatário
+        String chavePix,
 
         String descricao
 ) {}

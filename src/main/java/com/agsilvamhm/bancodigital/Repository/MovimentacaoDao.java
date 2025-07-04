@@ -35,13 +35,9 @@ public class MovimentacaoDao {
     public void salvar(Movimentacao movimentacao) {
         Objects.requireNonNull(movimentacao, "Objeto de movimentação não pode ser nulo.");
 
-        // CORREÇÃO: Trata os casos onde a conta de origem ou destino podem ser nulas.
-        // Usamos um operador ternário para isso.
         Long idOrigem = (movimentacao.getContaOrigem() != null) ? movimentacao.getContaOrigem().getId() : null;
         Long idDestino = (movimentacao.getContaDestino() != null) ? movimentacao.getContaDestino().getId() : null;
 
-        // Ao usar o jdbcTemplate.update, é uma boa prática especificar os tipos SQL,
-        // especialmente para valores que podem ser nulos.
         Object[] params = {
                 movimentacao.getTipo().name(),
                 movimentacao.getValor(),
@@ -66,20 +62,14 @@ public class MovimentacaoDao {
                 movimentacao.getTipo(), movimentacao.getValor());
     }
 
-    // Importações necessárias no início do arquivo MovimentacaoDao.java
-
-    // 1. CRIE UM ROW MAPPER PARA A ENTIDADE MOVIMENTACAO
-// Este mapper irá converter o resultado da consulta SQL em objetos Movimentacao.
     private final RowMapper<Movimentacao> movimentacaoRowMapper = (rs, rowNum) -> {
         Movimentacao mov = new Movimentacao();
         mov.setId(rs.getInt("mov_id"));
         mov.setTipo(TipoMovimentacao.valueOf(rs.getString("tipo")));
         mov.setValor(rs.getDouble("valor"));
-        // Importante: Converte o Timestamp do banco para LocalDateTime
         mov.setDataHora(rs.getTimestamp("data_hora").toLocalDateTime());
         mov.setDescricao(rs.getString("descricao"));
 
-        // Mapeia a conta de origem, se existir
         long idOrigem = rs.getLong("id_conta_origem");
         if (!rs.wasNull()) {
             Conta contaOrigem = new ContaCorrente(); // Usamos uma instância genérica, pois só precisamos do ID e número
@@ -88,7 +78,6 @@ public class MovimentacaoDao {
             mov.setContaOrigem(contaOrigem);
         }
 
-        // Mapeia a conta de destino, se existir
         long idDestino = rs.getLong("id_conta_destino");
         if (!rs.wasNull()) {
             Conta contaDestino = new ContaCorrente(); // Instância genérica
@@ -100,15 +89,6 @@ public class MovimentacaoDao {
         return mov;
     };
 
-// 2. CRIE O MÉTODO PARA BUSCAR MOVIMENTAÇÕES POR ID DA CONTA
-    /**
-     * Busca no banco de dados uma lista de todas as movimentações (entradas e saídas)
-     * associadas a um ID de conta específico.
-     * Os resultados são ordenados pela data, da mais recente para a mais antiga.
-     *
-     * @param contaId O ID da conta para a qual o extrato será gerado.
-     * @return Uma lista de objetos Movimentacao.
-     */
     public List<Movimentacao> buscarPorContaId(Long contaId) {
         // A query usa LEFT JOIN para que depósitos (sem origem) e saques (sem destino) funcionem.
         // O WHERE crucial é "m.id_conta_origem = ? OR m.id_conta_destino = ?"

@@ -51,7 +51,6 @@ public class EnderecoDao {
                 return ps;
             }, keyHolder);
 
-            // Extrai e retorna o ID gerado
             Integer generatedId = Objects.requireNonNull(keyHolder.getKey()).intValue();
             logger.info("Endereço salvo com sucesso com ID: {}", generatedId);
             return generatedId;
@@ -111,4 +110,3 @@ public class EnderecoDao {
         }
     }
 }
-

@@ -7,6 +7,6 @@ public record CriarContaRequest(
         String numero,
         String agencia,
         TipoConta tipoConta,
-        Double taxaManutencao, // Pode ser nulo se for poupança
-        Double taxaRendimento  // Pode ser nulo se for corrente
+        Double taxaManutencao,
+        Double taxaRendimento
 ) {}

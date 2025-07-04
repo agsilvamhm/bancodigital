@@ -209,13 +209,6 @@ public class ClienteDao {
         }
     }
 
-    // PASSO 2: ADICIONE ESTE NOVO MÉTODO COMPLETO
-    /**
-     * Busca um cliente completo (com endereço e contas) pelo seu CPF.
-     *
-     * @param cpf O CPF do cliente a ser buscado.
-     * @return Um Optional contendo o Cliente se encontrado, ou vazio caso contrário.
-     */
     public Optional<Cliente> buscarPorCpf(String cpf) {
         try {
             // Reutiliza o mesmo ResultSetExtractor, pois a estrutura da query é a mesma
@@ -227,5 +220,4 @@ public class ClienteDao {
             throw new RepositorioException("Erro ao buscar cliente por CPF.", ex);
         }
     }
-
 }

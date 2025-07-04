@@ -24,7 +24,6 @@ import java.util.Objects;
 @Service
 public class ContaService {
 
-    // ... (Logger e Construtor permanecem os mesmos) ...
     private static final Logger logger = LoggerFactory.getLogger(ContaService.class);
 
     private final ContaDao contaDao;

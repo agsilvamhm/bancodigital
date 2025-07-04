@@ -100,9 +100,7 @@ CREATE TABLE "seguro_cartao" (
     ON DELETE CASCADE
 );
 
--- Primeiro, remova a restrição antiga
 ALTER TABLE "movimentacao" DROP CONSTRAINT "check_movimentacao_tipo";
 
--- Depois, adicione a nova restrição com os valores atualizados
 ALTER TABLE "movimentacao" ADD CONSTRAINT "check_movimentacao_tipo"
 CHECK ("tipo" IN ('DEPOSITO', 'SAQUE', 'TRANSFERENCIA', 'PIX', 'TAXA_MANUTENCAO', 'RENDIMENTO'));

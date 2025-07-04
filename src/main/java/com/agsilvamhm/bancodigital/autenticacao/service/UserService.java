@@ -65,8 +65,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
-
     public List<UsuarioDto> listaUsuarios() {
         List<User> usuarios = userRepository.findAll();
         List<UsuarioDto> usuariosDto = usuarios.stream()

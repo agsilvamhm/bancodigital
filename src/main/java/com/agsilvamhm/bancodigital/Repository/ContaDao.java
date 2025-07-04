@@ -26,7 +26,6 @@ public class ContaDao {
     private static final Logger logger = LoggerFactory.getLogger(ContaDao.class);
     private final JdbcTemplate jdbcTemplate;
 
-    // ... (Construtor e BASE_SELECT_SQL permanecem os mesmos) ...
     @Autowired
     public ContaDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -49,7 +48,6 @@ public class ContaDao {
             """;
 
     private final RowMapper<Conta> contaRowMapper = (rs, rowNum) -> {
-        // ... (lógica de criação de ContaCorrente/ContaPoupanca está correta) ...
         String tipoConta = rs.getString("tipo_conta");
         Conta conta;
 
@@ -66,12 +64,10 @@ public class ContaDao {
         }
 
         conta.setId(rs.getLong("conta_id"));
-        // AJUSTE AQUI: Usar o setter correto.
         conta.setNumero(rs.getString("numero"));
         conta.setAgencia(rs.getString("agencia"));
         conta.setSaldo(rs.getBigDecimal("saldo"));
 
-        // ... (mapeamento do cliente está correto) ...
         Cliente cliente = new Cliente();
         cliente.setId(rs.getInt("cliente_id"));
         cliente.setCpf(rs.getString("cpf"));
@@ -84,7 +80,6 @@ public class ContaDao {
 
     @Transactional
     public Conta salvar(Conta conta) {
-        // ... (lógica de validação está correta) ...
         Objects.requireNonNull(conta, "O objeto conta não pode ser nulo.");
         Objects.requireNonNull(conta.getCliente(), "O cliente da conta não pode ser nulo.");
         Objects.requireNonNull(conta.getCliente().getId(), "O ID do cliente não pode ser nulo.");
@@ -102,7 +97,6 @@ public class ContaDao {
             return ps;
         }, keyHolder);
 
-        // ... (resto do método salvar e os outros métodos estão corretos) ...
         long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         conta.setId(generatedId);
 
@@ -121,7 +115,6 @@ public class ContaDao {
         return conta;
     }
 
-    // ... Os outros métodos (buscarPorId, buscarPorNumero, listar, atualizar) não precisam de alteração ...
     public Optional<Conta> buscarPorId(Long id) {
         String sql = BASE_SELECT_SQL + " WHERE c.id = ?";
         try {
@@ -177,13 +170,6 @@ public class ContaDao {
         logger.info("Conta ID {} atualizada com sucesso.", conta.getId());
     }
 
-    // ADICIONE ESTE NOVO MÉTODO COMPLETO
-    /**
-     * Busca todas as contas associadas a um ID de cliente específico.
-     *
-     * @param clienteId O ID do cliente.
-     * @return Uma lista de Contas pertencentes ao cliente.
-     */
     public List<Conta> buscarPorClienteId(Integer clienteId) {
         String sql = BASE_SELECT_SQL + " WHERE c.id_cliente = ?";
         try {

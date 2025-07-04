@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.math.BigDecimal;
 
-// CORREÇÃO: Anotações para ajudar o Jackson (API) a lidar com a herança.
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -21,17 +20,10 @@ public abstract class Conta { // CORREÇÃO: A classe base deve ser abstrata.
 
     @JsonBackReference
     private Cliente cliente;
-
-    // CORREÇÃO: Nome do campo ajustado de 'numeroConta' para 'numero'.
     private String numero;
     private String agencia;
     private BigDecimal saldo;
 
-    // CORREÇÃO: Os campos 'tipo' e 'ativa' foram removidos, pois não existem na tabela 'conta'.
-    // O tipo é definido pela classe filha (ContaCorrente ou ContaPoupanca).
-    // A ativação pode ser um conceito de negócio, mas não está no schema atual.
-
-    // Getters e Setters ajustados
     public Long getId() {
         return id;
     }

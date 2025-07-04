@@ -47,7 +47,6 @@ public class ContaController {
     }
 
     @GetMapping("/{id}/saldo")
-    // A anotação de segurança pode ser mantida
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<ContaInfoDTO> consultarInfoConta(@PathVariable Long id) {
         Conta conta = contaService.buscarPorId(id);
