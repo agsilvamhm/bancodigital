@@ -294,4 +294,19 @@ public class ContaService {
 
         return movimentacao;
     }
+
+    public List<Movimentacao> listarMovimentacoesPorConta(Long idConta) {
+        logger.info("Buscando extrato para a conta ID: {}", idConta);
+
+        // 1. Primeiro, garantimos que a conta existe.
+        //    O método buscarPorId já lança EntidadeNaoEncontradaException se não achar.
+        this.buscarPorId(idConta);
+
+        // 2. Se a conta existe, chamamos o DAO para buscar as movimentações.
+        List<Movimentacao> movimentacoes = movimentacaoDao.buscarPorContaId(idConta);
+
+        logger.info("Encontradas {} movimentações para a conta ID: {}", movimentacoes.size(), idConta);
+        return movimentacoes;
+    }
+
 }

@@ -13,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/contas")
@@ -93,5 +94,12 @@ public class ContaController {
 
         Movimentacao recibo = contaService.realizarPix(id, request);
         return ResponseEntity.ok(recibo);
+    }
+
+    @GetMapping("/{id}/movimentacoes")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or @authService.podeAcessarConta(#id)")
+    public ResponseEntity<List<Movimentacao>> listarMovimentacoes(@PathVariable Long id) {
+        List<Movimentacao> extrato = contaService.listarMovimentacoesPorConta(id);
+        return ResponseEntity.ok(extrato);
     }
 }
