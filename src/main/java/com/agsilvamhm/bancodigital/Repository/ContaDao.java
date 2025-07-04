@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -174,5 +175,23 @@ public class ContaDao {
         }
 
         logger.info("Conta ID {} atualizada com sucesso.", conta.getId());
+    }
+
+    // ADICIONE ESTE NOVO MÉTODO COMPLETO
+    /**
+     * Busca todas as contas associadas a um ID de cliente específico.
+     *
+     * @param clienteId O ID do cliente.
+     * @return Uma lista de Contas pertencentes ao cliente.
+     */
+    public List<Conta> buscarPorClienteId(Integer clienteId) {
+        String sql = BASE_SELECT_SQL + " WHERE c.id_cliente = ?";
+        try {
+            // Usa o contaRowMapper para mapear cada linha do resultado para um objeto Conta
+            return jdbcTemplate.query(sql, contaRowMapper, clienteId);
+        } catch (DataAccessException ex) {
+            logger.error("Erro ao buscar contas para o cliente ID: {}", clienteId, ex);
+            throw new RepositorioException("Erro ao buscar contas do cliente.", ex);
+        }
     }
 }

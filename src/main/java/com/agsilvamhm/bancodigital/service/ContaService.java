@@ -7,10 +7,7 @@ import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaExc
 import com.agsilvamhm.bancodigital.controller.exception.RegraNegocioException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
 import com.agsilvamhm.bancodigital.model.*;
-import com.agsilvamhm.bancodigital.model.dto.CriarContaRequest;
-import com.agsilvamhm.bancodigital.model.dto.DepositoRequestDTO;
-import com.agsilvamhm.bancodigital.model.dto.OperacaoContaDTO;
-import com.agsilvamhm.bancodigital.model.dto.TransferenciaRequestDTO;
+import com.agsilvamhm.bancodigital.model.dto.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -242,6 +239,58 @@ public class ContaService {
         movimentacaoDao.salvar(movimentacao);
 
         logger.info("Saque de R$ {} da conta #{} realizado com sucesso.", request.valor(), conta.getNumero());
+
+        return movimentacao;
+    }
+
+    @Transactional
+    public Movimentacao realizarPix(Long idContaOrigem, PixRequestDTO request) {
+        // 1. Busca a conta de origem
+        Conta contaOrigem = buscarPorId(idContaOrigem);
+
+        // 2. RESOLUÇÃO DA CHAVE PIX: Busca o cliente de destino pelo CPF (nossa Chave Pix)
+        Cliente clienteDestino = clienteDao.buscarPorCpf(request.chavePix())
+                .orElseThrow(() -> new EntidadeNaoEncontradaException(
+                        "Nenhuma conta encontrada para a Chave PIX (CPF) fornecida."));
+
+        // 3. Busca a primeira conta associada a esse cliente de destino.
+        // Em um sistema real, poderia haver uma lógica para escolher a conta principal.
+        List<Conta> contasDestino = contaDao.buscarPorClienteId(clienteDestino.getId());
+        if (contasDestino.isEmpty()) {
+            throw new EntidadeNaoEncontradaException(
+                    "O destinatário da Chave PIX não possui uma conta ativa.");
+        }
+        Conta contaDestino = contasDestino.get(0); // Pega a primeira conta encontrada
+
+        // 4. Validações de negócio (saldo, mesma conta, etc.)
+        if (contaOrigem.getId().equals(contaDestino.getId())) {
+            throw new RegraNegocioException("A conta de origem e destino não podem ser a mesma.");
+        }
+        if (contaOrigem.getSaldo().compareTo(request.valor()) < 0) {
+            throw new RegraNegocioException("Saldo insuficiente para realizar o PIX.");
+        }
+
+        // 5. Realiza a operação de débito e crédito
+        contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(request.valor()));
+        contaDestino.setSaldo(contaDestino.getSaldo().add(request.valor()));
+
+        // 6. Atualiza as duas contas no banco de dados
+        contaDao.atualizar(contaOrigem);
+        contaDao.atualizar(contaDestino);
+
+        // 7. Cria e salva o registro da movimentação
+        Movimentacao movimentacao = new Movimentacao();
+        movimentacao.setTipo(TipoMovimentacao.PIX); // Certifique-se que seu enum tem PIX
+        movimentacao.setValor(request.valor().doubleValue());
+        movimentacao.setDataHora(LocalDateTime.now());
+        movimentacao.setContaOrigem(contaOrigem);
+        movimentacao.setContaDestino(contaDestino);
+        movimentacao.setDescricao(request.descricao());
+
+        movimentacaoDao.salvar(movimentacao);
+
+        logger.info("PIX de R$ {} da conta #{} para a Chave Pix '{}' realizado com sucesso.",
+                request.valor(), contaOrigem.getNumero(), request.chavePix());
 
         return movimentacao;
     }

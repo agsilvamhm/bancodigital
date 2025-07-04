@@ -84,4 +84,14 @@ public class ContaController {
         Movimentacao recibo = contaService.realizarSaque(id, request);
         return ResponseEntity.ok(recibo);
     }
+
+    @PostMapping("/{id}/pix")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or @authService.podeAcessarConta(#id)")
+    public ResponseEntity<Movimentacao> realizarPix(
+            @PathVariable Long id,
+            @Valid @RequestBody PixRequestDTO request) {
+
+        Movimentacao recibo = contaService.realizarPix(id, request);
+        return ResponseEntity.ok(recibo);
+    }
 }
