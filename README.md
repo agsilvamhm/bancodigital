@@ -14,7 +14,7 @@ O sistema foi projetado para cobrir as seguintes áreas:
     * Classificação de clientes em três categorias: **Comum**, **Super** e **Premium**, que define o acesso a diferentes benefícios e taxas.
     * Validação rigorosa de dados na entrada, como formato e unicidade do CPF, idade e formato de endereço.
 
-* **💵 Contas Bancárias:**
+* **👤 Contas Bancárias:**
 
     * Abertura de **Conta Corrente** e **Conta Poupança**.
     * Operações essenciais como consulta de saldo, depósito, saque e transferências (incluindo Pix).
@@ -36,8 +36,8 @@ O sistema foi projetado para cobrir as seguintes áreas:
 
 A API é RESTful e foi estruturada em torno dos principais recursos do sistema. Abaixo estão os endpoints planejados para cada módulo.
 
-\<details\>
-\<summary\>\<strong\>👤 Endpoints de Cliente\</strong\>\</summary\>
+<details>
+<summary><strong>👤 Endpoints de Cliente</strong></summary>
 
 - `POST /clientes` - Criar um novo cliente
 - `GET /clientes` - Listar todos os clientes
@@ -45,10 +45,10 @@ A API é RESTful e foi estruturada em torno dos principais recursos do sistema. 
 - `PUT /clientes/{id}` - Atualizar informações de um cliente
 - `DELETE /clientes/{id}` - Remover um cliente
 
-\</details\>
+</details>
 
-\<details\>
-\<summary\>\<strong\>💵 Endpoints de Conta\</strong\>\</summary\>
+<details>
+<summary><strong>👤 Endpoints de Conta</strong></summary>
 
 - `POST /contas` - Criar uma nova conta
 - `GET /contas/{id}` - Obter detalhes de uma conta
@@ -60,10 +60,10 @@ A API é RESTful e foi estruturada em torno dos principais recursos do sistema. 
 - `PUT /contas/{id}/manutencao` - Aplicar taxa de manutenção (conta corrente)
 - `PUT /contas/{id}/rendimentos` - Aplicar rendimentos (conta poupança)
 
-\</details\>
+</details>
 
-\<details\>
-\<summary\>\<strong\>💳 Endpoints de Cartão\</strong\>\</summary\>
+<details>
+<summary><strong>💳 Endpoints de Cartão</strong></summary>
 
 - `POST /cartoes` - Emitir um novo cartão
 - `GET /cartoes/{id}` - Obter detalhes de um cartão
@@ -75,17 +75,17 @@ A API é RESTful e foi estruturada em torno dos principais recursos do sistema. 
 - `PUT /cartoes/{id}/limite` - Alterar limite do cartão de crédito
 - `PUT /cartoes/{id}/limite-diario` - Alterar limite diário do cartão de débito
 
-\</details\>
+</details>
 
-\<details\>
-\<summary\>\<strong\>🛡️ Endpoints de Seguro (Opcional)\</strong\>\</summary\>
+<details>
+<summary><strong>🛡️ Endpoints de Seguro (Opcional)</strong></summary>
 
 - `POST /seguros` - Contratar um seguro
 - `GET /seguros` - Listar todos os seguros disponíveis
 - `GET /seguros/{id}` - Obter detalhes de uma apólice de seguro
 - `PUT /seguros/{id}/cancelar` - Cancelar uma apólice de seguro
 
-\</details\>
+</details>
 
 ## 🚀 Funcionalidades Adicionais (Opcionais)
 
