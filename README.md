@@ -78,7 +78,7 @@ A API é RESTful e foi estruturada em torno dos principais recursos do sistema. 
 </details>
 
 <details>
-<summary><strong>🛡️ Endpoints de Seguro (Opcional)</strong></summary>
+<summary><strong>🛡️ Endpoints de Seguro</strong></summary>
 
 - `POST /seguros` - Contratar um seguro
 - `GET /seguros` - Listar todos os seguros disponíveis
@@ -87,9 +87,7 @@ A API é RESTful e foi estruturada em torno dos principais recursos do sistema. 
 
 </details>
 
-## 🚀 Funcionalidades Adicionais (Opcionais)
-
-Para evoluir o projeto, as seguintes funcionalidades podem ser implementadas:
+## 🚀 Funcionalidades Adicionais
 
 * **🔒 Autenticação e Autorização:** Implementação de `Spring Security` com `JWT` para proteger os endpoints e definir níveis de acesso (`ROLE_ADMIN`, `ROLE_CLIENTE`).
 * **🌐 Integração com APIs Externas:**
