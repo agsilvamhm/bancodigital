@@ -224,43 +224,28 @@ classDiagram
 ## Arquitetura da aplicação
 
 ```mermaid
-mindmap
-root((banco-project))
-src
-main
-java
-com.suacorporacao.banco
-<br/>
-domain (Core)
-::icon(fa fa-brain)
-model
-(POJOs: Cliente, Conta...)
-enums
-(TipoCartao, CategoriaCliente...)
-exception
-(DomainException)
-<br/>
-application (Use Cases)
-::icon(fa fa-cogs)
-ports
-in (Interfaces Use Case)
-out (Interfaces Repositório)
-usecase
-(Implementação Use Case)
-<br/>
-infrastructure (Adapters)
-::icon(fa fa-plug)
-config
-(Spring Beans)
-adapters
-in (Entrada)
-web (REST Controllers, DTOs)
-out (Saída)
-persistence (JPA, Repositories)
-<br/>
-resources
-::icon(fa fa-file-alt)
-(application.properties)
+graph TD
+    A["<b style='font-size:16px'>Seu Projeto</b>"] --> B(src);
+    B --> C(main);
+    C --> D(java);
+    C --> E(resources);
+    D --> F(com.suacorporacao.banco);
+    
+    subgraph "Camada de Domínio"
+      F --> G["<b style='color:#7B2CBF'>domain</b><br/>(Core/Negócio)"];
+    end
+
+    subgraph "Camada de Aplicação"
+      F --> H["<b style='color:#0077B6'>application</b><br/>(Casos de Uso)"];
+    end
+    
+    subgraph "Camada de Infraestrutura"
+      F --> I["<b style='color:#43AA8B'>infrastructure</b><br/>(Adaptadores)"];
+    end
+
+    style G fill:#E8D5F9,stroke:#7B2CBF
+    style H fill:#D6EEFC,stroke:#0077B6
+    style I fill:#D9F5EC,stroke:#43AA8B
 ```
 
 ## Fluxo de Camadas (Visão Estrutural)
