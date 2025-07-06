@@ -104,3 +104,5 @@ ALTER TABLE "movimentacao" DROP CONSTRAINT "check_movimentacao_tipo";
 
 ALTER TABLE "movimentacao" ADD CONSTRAINT "check_movimentacao_tipo"
 CHECK ("tipo" IN ('DEPOSITO', 'SAQUE', 'TRANSFERENCIA', 'PIX', 'TAXA_MANUTENCAO', 'RENDIMENTO'));
+
+-- Povoar tabelas para os testes  --
