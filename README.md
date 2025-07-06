@@ -225,27 +225,120 @@ classDiagram
 
 ```mermaid
 graph TD
-    A["<b style='font-size:16px'>Seu Projeto</b>"] --> B(src);
-    B --> C(main);
-    C --> D(java);
-    C --> E(resources);
-    D --> F(com.suacorporacao.banco);
+    %% Título Principal
+    A["<b style='font-size:18px'>Arquitetura Hexagonal - Sistema Bancário</b>"] --> B{{"<i class='fa fa-project-diagram'></i><br>Projeto"}}
     
-    subgraph "Camada de Domínio"
-      F --> G["<b style='color:#7B2CBF'>domain</b><br/>(Core/Negócio)"];
+    B --> G["<b style='color:#8a2be2'>🟣 DOMAIN</b><br>(Entidades e Regras de Negócio)"]
+    B --> H["<b style='color:#1e90ff'>🔵 APPLICATION</b><br>(Casos de Uso e Orquestração)"]
+    B --> I["<b style='color:#2e8b57'>🟢 INFRASTRUCTURE</b><br>(Frameworks e Drivers)"]
+
+    %% -------------------------------------
+    %% --- CAMADA DE DOMÍNIO (O NÚCLEO) ---
+    %% -------------------------------------
+    subgraph DOMAIN
+        direction LR
+        subgraph " "
+            G_Models["<i class='fa fa-folder-open'></i> Modelos"]
+            G_Enums["<i class='fa fa-folder-open'></i> Enums"]
+        end
+        
+        G --> G_Models & G_Enums
+
+        subgraph " "
+            G_Cliente["<i class='fa fa-user'></i> Cliente"]
+            G_Conta["<i class='fa fa-file-invoice-dollar'></i> Conta"]
+            G_Movimentacao["<i class='fa fa-exchange-alt'></i> Movimentacao"]
+            G_Cartao["<i class='fa fa-credit-card'></i> Cartao"]
+            G_Endereco["<i class='fa fa-map-marker-alt'></i> Endereco"]
+            G_Seguro["<i class='fa fa-shield-alt'></i> SeguroCartao"]
+            
+            G_CatCliente["<i class='fa fa-tag'></i> CategoriaCliente"]
+            G_TipoMov["<i class='fa fa-tag'></i> TipoMovimentacao"]
+            G_TipoCartao["<i class='fa fa-tag'></i> TipoCartao"]
+        end
+        G_Models --> G_Cliente & G_Conta & G_Movimentacao & G_Cartao & G_Endereco & G_Seguro
+        G_Enums --> G_CatCliente & G_TipoMov & G_TipoCartao
     end
 
-    subgraph "Camada de Aplicação"
-      F --> H["<b style='color:#0077B6'>application</b><br/>(Casos de Uso)"];
-    end
-    
-    subgraph "Camada de Infraestrutura"
-      F --> I["<b style='color:#43AA8B'>infrastructure</b><br/>(Adaptadores)"];
+    %% ------------------------------------------
+    %% --- CAMADA DE APLICAÇÃO (ORQUESTRADOR) ---
+    %% ------------------------------------------
+    subgraph APPLICATION
+        direction LR
+        H_Ports["<i class='fa fa-door-open'></i> Ports (Interfaces)"]
+        H_Services["<i class='fa fa-cogs'></i> Services (Use Cases)"]
+        
+        H --> H_Ports & H_Services
+
+        subgraph " "
+            H_In["<i class='fa fa-sign-in-alt'></i> Ports de Entrada<br>(O que a aplicação oferece)"]
+            H_Out["<i class='fa fa-sign-out-alt'></i> Ports de Saída<br>(O que a aplicação precisa)"]
+        end
+        H_Ports --> H_In & H_Out
+
+        subgraph " "
+            H_ClienteUseCase["<i class='fa fa-concierge-bell'></i> ClienteUseCase"]
+            H_ContaUseCase["<i class='fa fa-concierge-bell'></i> ContaUseCase"]
+        end
+        H_In --> H_ClienteUseCase & H_ContaUseCase
+
+        subgraph " "
+            H_ClienteRepoPort["<i class='fa fa-database'></i> ClienteRepositoryPort"]
+            H_ContaRepoPort["<i class='fa fa-database'></i> ContaRepositoryPort"]
+        end
+        H_Out --> H_ClienteRepoPort & H_ContaRepoPort
+
+        subgraph " "
+            H_ClienteService["<i class='fa fa-cog'></i> ClienteService"]
+        end
+        H_Services --> H_ClienteService
     end
 
-    style G fill:#E8D5F9,stroke:#7B2CBF
-    style H fill:#D6EEFC,stroke:#0077B6
-    style I fill:#D9F5EC,stroke:#43AA8B
+    %% ----------------------------------------------------
+    %% --- CAMADA DE INFRAESTRUTURA (ADAPTADORES) ---
+    %% ----------------------------------------------------
+    subgraph INFRASTRUCTURE
+        direction LR
+        I_Driving["<i class='fa fa-arrow-alt-circle-right'></i> Driving Adapters<br>(Quem aciona a aplicação)"]
+        I_Driven["<i class='fa fa-arrow-alt-circle-left'></i> Driven Adapters<br>(Quem é acionado pela aplicação)"]
+        
+        I --> I_Driving & I_Driven
+        
+        subgraph " "
+            I_Web["<i class='fa fa-globe'></i> Web (API REST)"]
+        end
+        I_Driving --> I_Web
+        
+        subgraph " "
+             I_Persistence["<i class='fa fa-hdd'></i> Persistence (BD)"]
+        end
+        I_Driven --> I_Persistence
+
+        subgraph " "
+            I_ClienteController["<i class='fa fa-gamepad'></i> ClienteController"]
+            I_ClienteDTO["<i class='fa fa-file-alt'></i> ClienteDTO"]
+        end
+        I_Web --> I_ClienteController & I_ClienteDTO
+
+        subgraph " "
+            I_ClienteRepoAdapter["<i class='fa fa-database'></i><i class='fa fa-cogs'></i> ClienteRepositoryAdapter"]
+            I_ClienteEntity["<i class='fa fa-table'></i> jpa.ClienteEntity"]
+        end
+        I_Persistence --> I_ClienteRepoAdapter & I_ClienteEntity
+    end
+    
+    %% -----------------------------------------------------------------
+    %% --- FLUXO DE DEPENDÊNCIAS (A REGRA DA ARQUITETURA HEXAGONAL) ---
+    %% -----------------------------------------------------------------
+    I_ClienteController -.->|Usa| H_ClienteUseCase
+    H_ClienteService -.->|Usa| H_ClienteRepoPort
+    I_ClienteRepoAdapter -.->|Implementa| H_ClienteRepoPort
+    H_ClienteService -.->|Implementa| H_ClienteUseCase
+
+    %% --- Estilos Visuais ---
+    style G fill:#f2eaff,stroke:#8a2be2,stroke-width:2px
+    style H fill:#eaf8ff,stroke:#1e90ff,stroke-width:2px
+    style I fill:#edf7f4,stroke:#2e8b57,stroke-width:2px
 ```
 
 ## Fluxo de Camadas (Visão Estrutural)
