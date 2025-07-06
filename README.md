@@ -223,88 +223,45 @@ classDiagram
 
 ## Arquitetura da aplicação
 
+```mermaid
+mindmap
+root((banco-project))
 src
-└── main
-└── java
-|   └── com
-|       └── suacorporacao
-|           └── banco
-|               ├── Application.java            // Ponto de entrada do Spring Boot
-|               |
-|               ├── domain                      // O NÚCLEO DA APLICAÇÃO (O "HEXÁGONO")
-|               |   ├── model                   // Modelos de domínio puros (POJOs)
-|               |   |   ├── Cliente.java
-|               |   |   ├── Conta.java
-|               |   |   ├── ContaCorrente.java
-|               |   |   ├── ContaPoupanca.java
-|               |   |   ├── Endereco.java
-|               |   |   ├── Cartao.java
-|               |   |   ├── Movimentacao.java
-|               |   |   └── SeguroCartao.java
-|               |   |
-|               |   ├── enums                   // Enumerações do domínio
-|               |   |   ├── CategoriaCliente.java
-|               |   |   ├── TipoMovimentacao.java
-|               |   |   └── TipoCartao.java
-|               |   |
-|               |   └── exception               // Exceções de negócio
-|               |       └── DomainException.java
-|               |
-|               ├── application                 // CAMADA DE ORQUESTRAÇÃO E CASOS DE USO
-|               |   ├── ports                   // As "portas" de entrada e saída do hexágono
-|               |   |   ├── in                  // Portas de Entrada: definem como o mundo exterior aciona a aplicação
-|               |   |   |   ├── ClienteUseCase.java
-|               |   |   |   ├── ContaUseCase.java
-|               |   |   |   └── CartaoUseCase.java
-|               |   |   |
-|               |   |   └── out                 // Portas de Saída: definem o que a aplicação precisa do mundo exterior
-|               |   |       ├── ClienteRepositoryPort.java
-|               |   |       ├── ContaRepositoryPort.java
-|               |   |       └── CartaoRepositoryPort.java
-|               |   |
-|               |   └── usecase                 // Implementação dos casos de uso (das portas de entrada)
-|               |       ├── ClienteUseCaseImpl.java
-|               |       ├── ContaUseCaseImpl.java
-|               |       └── CartaoUseCaseImpl.java
-|               |
-|               └── infrastructure              // CAMADA EXTERNA (ADAPTADORES)
-|                   ├── config                  // Configurações do Spring (Beans, Segurança, etc.)
-|                   |   └── BeanConfiguration.java
-|                   |
-|                   ├── adapters                // Implementações concretas das portas
-|                   |   ├── in                  // Adaptadores de Entrada (ex: Controllers, Consumers de Fila)
-|                   |   |   └── web
-|                   |   |       ├── controller
-|                   |   |       |   ├── ClienteController.java
-|                   |   |       |   └── ContaController.java
-|                   |   |       ├── dto         // Data Transfer Objects para requests e responses
-|                   |   |       |   ├── request
-|                   |   |       |   |   └── ClienteRequest.java
-|                   |   |       |   └── response
-|                   |   |       |       └── ClienteResponse.java
-|                   |   |       └── mapper      // Mapeamento entre DTOs e Modelos de Domínio
-|                   |   |           └── ClienteWebMapper.java
-|                   |   |
-|                   |   └── out                 // Adaptadores de Saída (ex: Repositórios, Gateways HTTP)
-|                   |       └── persistence
-|                   |           ├── entity      // Entidades JPA (representação do banco de dados)
-|                   |           |   ├── ClienteEntity.java
-|                   |           |   ├── ContaEntity.java
-|                   |           |   └── EnderecoEntity.java
-|                   |           ├── repository  // Implementação das portas de saída com Spring Data JPA
-|                   |           |   └── jpa
-|                   |           |       ├── ClienteJpaRepository.java // Interface do Spring Data
-|                   |           |       └── ClienteRepositoryAdapter.java // Adaptador que implementa a porta
-|                   |           └── mapper      // Mapeamento entre Entidades JPA e Modelos de Domínio
-|                   |               └── ClientePersistenceMapper.java
-|                   |
-└── resources
-└── application.properties
-
-
-
-
-
+main
+java
+com.suacorporacao.banco
+<br/>
+domain (Core)
+::icon(fa fa-brain)
+model
+(POJOs: Cliente, Conta...)
+enums
+(TipoCartao, CategoriaCliente...)
+exception
+(DomainException)
+<br/>
+application (Use Cases)
+::icon(fa fa-cogs)
+ports
+in (Interfaces Use Case)
+out (Interfaces Repositório)
+usecase
+(Implementação Use Case)
+<br/>
+infrastructure (Adapters)
+::icon(fa fa-plug)
+config
+(Spring Beans)
+adapters
+in (Entrada)
+web (REST Controllers, DTOs)
+out (Saída)
+persistence (JPA, Repositories)
+<br/>
+resources
+::icon(fa fa-file-alt)
+(application.properties)
+```
 
 ## Fluxo de Camadas (Visão Estrutural)
 
