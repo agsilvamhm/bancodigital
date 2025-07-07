@@ -221,7 +221,7 @@ classDiagram
   Cartao "1" -- "0..1" SeguroCartao : pode ter  
 ```
 
-## Arquitetura da aplicação
+## Arquitetura da aplicação (Exagonal)
 
 ```mermaid
 graph TD
