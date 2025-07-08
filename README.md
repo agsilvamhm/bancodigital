@@ -109,7 +109,7 @@ A API é RESTful e foi estruturada em torno dos principais recursos do sistema. 
 http://localhost:8080/swagger-ui/index.html
 
 
-## Diagrama de Classes (Domínio da API)
+## Diagrama de Classes (Domínio da Aplicação)
 
 ```mermaid
 classDiagram

@@ -13,11 +13,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/clientes")
-public class ClienteController {
+public class ClienteController_v1 {
 
     private final ClienteService clienteService;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController_v1(ClienteService clienteService) {
         this.clienteService = clienteService;
     }
 

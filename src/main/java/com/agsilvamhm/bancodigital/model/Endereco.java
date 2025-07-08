@@ -3,7 +3,7 @@ package com.agsilvamhm.bancodigital.model;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-public class Endereco {
+public class Endereco extends com.agsilvamhm.bancodigital.core.domain.model.Endereco {
     private Integer id;
     private String rua;
     private Integer numero;
