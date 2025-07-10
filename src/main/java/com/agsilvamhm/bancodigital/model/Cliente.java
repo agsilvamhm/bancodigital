@@ -1,5 +1,6 @@
 package com.agsilvamhm.bancodigital.model;
 
+import com.agsilvamhm.bancodigital.util.annotations.MaiorDeIdade;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ public class Cliente {
     private String nome;
     @NotNull(message = "A data de nascimento é obrigatória.")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @MaiorDeIdade
     private LocalDate dataNascimento;
     @NotNull(message = "O endereço é obrigatório.")
     @Valid

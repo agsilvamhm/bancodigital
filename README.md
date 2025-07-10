@@ -103,6 +103,7 @@ A API é RESTful e foi estruturada em torno dos principais recursos do sistema. 
 - **JWT (JSON Web Tokens)**: Para a autenticação, empreguei JWT, um método seguro e eficiente para transmitir informações entre as partes como um objeto JSON.
 - **H2 Database**: Para desenvolvimento e testes, utilizei o H2, um banco de dados relacional em memória que agiliza o ciclo de desenvolvimento.
 - **OpenAPI (Swagger)**: Criei uma documentação de API eficaz e fácil de entender usando a OpenAPI (Swagger), perfeitamente alinhada com a alta produtividade que o Spring Boot oferece.
+- **JUnit 5**: Para garantir a robustez e a qualidade do código, adotei o JUnit 5 para a criação de testes unitários e de integração. 
 
 ## Link para visualizar os recursos da API
 
