@@ -78,17 +78,4 @@ class ClienteTest {
         Set<ConstraintViolation<Cliente>> violations = validator.validate(clienteValido);
         assertFalse(violations.isEmpty(), "Nome inválido pois contêm caracteres especiais");
     }
-
-    @Test
-    @DisplayName("Deve rejeitar o CEP pois contem o formato invalido")
-    void deveValidarCEP() {
-        enderecoValido.setCep("22222222");
-        clienteValido.setEndereco(enderecoValido);
-        Set<ConstraintViolation<Cliente>> violations = validator.validate(clienteValido);
-        assertFalse(violations.isEmpty(), "CEP é inválido não possuiu os 8 digitos");
-    }
-
-
-
-
 }

@@ -293,132 +293,132 @@ graph TD
     Controller -- Captura Exceções --> ErrorResponse
 ```
 
-## Fluxo da Operação de Depósito
-
-```mermaid
-%% Fluxo da Operação de Depósito
-graph TD
-    subgraph "Início da Requisição"
-        A["POST /contas/{id}/deposito com DTO(valor)"]
-    end
-
-    subgraph "Camada de Serviço (@Transactional)"
-        B{Valor do depósito é positivo?}
-        B -- Não --> C["Lança Erro de Validação<br/>(IllegalArgumentException)"]
-        B -- Sim --> D[Busca conta de destino pelo ID]
-        D --> E{Conta de destino existe?}
-        E -- Não --> F["Lança Erro<br/>(EntidadeNaoEncontradaException)"]
-        E -- Sim --> G((Início da Transação))
-        G --> H["1. Adiciona valor ao saldo da conta"]
-        H --> I["2. Atualiza a conta no banco (UPDATE)"]
-        I --> J["3. Cria registro de Movimentacao<br/>(tipo=DEPOSITO, origem=null)"]
-        J --> K["4. Salva a movimentação no banco (INSERT)"]
-        K --> L((Fim da Transação))
-    end
-
-    subgraph "Fim da Requisição"
-        L -- Commit --> M(("Sucesso<br/>Retorna 200 OK com 'Recibo'"))
-        C --> Z(("Falha<br/>Retorna Erro 422"))
-        F --> Z
-        H -- Falha no DB --> R((Rollback))
-        I -- Falha no DB --> R
-        J -- Falha no DB --> R
-        K -- Falha no DB --> R
-        R --> Y(("Falha<br/>Retorna Erro 500"))
-    end
+//## Fluxo da Operação de Depósito
+//
+//```mermaid
+//%% Fluxo da Operação de Depósito
+//graph TD
+//    subgraph "Início da Requisição"
+//        A["POST /contas/{id}/deposito com DTO(valor)"]
+//    end
+//
+//    subgraph "Camada de Serviço (@Transactional)"
+ //       B{Valor do depósito é positivo?}
+//        B -- Não --> C["Lança Erro de Validação<br/>(IllegalArgumentException)"]
+//        B -- Sim --> D[Busca conta de destino pelo ID]
+ //       D --> E{Conta de destino existe?}
+ //       E -- Não --> F["Lança Erro<br/>(EntidadeNaoEncontradaException)"]
+ //       E -- Sim --> G((Início da Transação))
+ //       G --> H["1. Adiciona valor ao saldo da conta"]
+ //       H --> I["2. Atualiza a conta no banco (UPDATE)"]
+  //      I --> J["3. Cria registro de Movimentacao<br/>(tipo=DEPOSITO, origem=null)"]
+ //       J --> K["4. Salva a movimentação no banco (INSERT)"]
+ //       K --> L((Fim da Transação))
+ //   end/
+//
+ //   subgraph "Fim da Requisição"
+ //       L -- Commit --> M(("Sucesso<br/>Retorna 200 OK com 'Recibo'"))
+ //       C --> Z(("Falha<br/>Retorna Erro 422"))
+  //      F --> Z
+   //     H -- Falha no DB --> R((Rollback))
+   //     I -- Falha no DB --> R
+   //     J -- Falha no DB --> R
+   //     K -- Falha no DB --> R
+   //     R --> Y(("Falha<br/>Retorna Erro 500"))
+  //  end
     
-    style M fill:#d4edda,stroke:#c3e6cb
-    style Z fill:#f8d7da,stroke:#f5c6cb
-    style Y fill:#f8d7da,stroke:#f5c6cb
-```
+  //  style M fill:#d4edda,stroke:#c3e6cb
+  //  style Z fill:#f8d7da,stroke:#f5c6cb
+  //  style Y fill:#f8d7da,stroke:#f5c6cb
+//```
 
-## Fluxo da Operação de Saque
+//## Fluxo da Operação de Saque
+//
+//```mermaid
+//%% Fluxo da Operação de Saque
+//graph TD
+//subgraph "Início da Requisição"
+//A["POST /contas/{id}/saque com DTO(valor)"]
+//end
+//
+ //   subgraph "Camada de Serviço (@Transactional)"
+ //       B[Busca conta de origem pelo ID]
+ //       B --> C{Conta de origem existe?}
+ //       C -- Não --> D["Lança Erro<br/>(EntidadeNaoEncontradaException)"]
+ //       C -- Sim --> E{Valor do saque é positivo?}
+ //       E -- Não --> F["Lança Erro de Validação<br/>(IllegalArgumentException)"]
+ //       E -- Sim --> G{Conta tem saldo suficiente?}
+ //       G -- Não --> H["Lança Erro de Negócio<br/>('Saldo insuficiente')"]
+ //       G -- Sim --> I((Início da Transação))
+ //       I --> J["1. Subtrai valor do saldo da conta"]
+ //       J --> K["2. Atualiza a conta no banco (UPDATE)"]
+ //       K --> L["3. Cria registro de Movimentacao<br/>(tipo=SAQUE, destino=null)"]
+ //       L --> M["4. Salva a movimentação no banco (INSERT)"]
+ //       M --> N((Fim da Transação))
+ //   end
+//
+ //   subgraph "Fim da Requisição"
+ //       N -- Commit --> O(("Sucesso<br/>Retorna 200 OK com 'Recibo'"))
+  //      D --> Z(("Falha<br/>Retorna Erro 404"))
+ //       F --> Z
+//        H --> Z
+//        J -- Falha no DB --> R((Rollback))
+//        K -- Falha no DB --> R
+//        L -- Falha no DB --> R
+ //       M -- Falha no DB --> R
+ //       R --> Y(("Falha<br/>Retorna Erro 500"))
+ //   end
+ //   
+ //   style O fill:#d4edda,stroke:#c3e6cb
+ //   style Z fill:#f8d7da,stroke:#f5c6cb
+ //   style Y fill:#f8d7da,stroke:#f5c6cb
+//```
 
-```mermaid
-%% Fluxo da Operação de Saque
-graph TD
-subgraph "Início da Requisição"
-A["POST /contas/{id}/saque com DTO(valor)"]
-end
-
-    subgraph "Camada de Serviço (@Transactional)"
-        B[Busca conta de origem pelo ID]
-        B --> C{Conta de origem existe?}
-        C -- Não --> D["Lança Erro<br/>(EntidadeNaoEncontradaException)"]
-        C -- Sim --> E{Valor do saque é positivo?}
-        E -- Não --> F["Lança Erro de Validação<br/>(IllegalArgumentException)"]
-        E -- Sim --> G{Conta tem saldo suficiente?}
-        G -- Não --> H["Lança Erro de Negócio<br/>('Saldo insuficiente')"]
-        G -- Sim --> I((Início da Transação))
-        I --> J["1. Subtrai valor do saldo da conta"]
-        J --> K["2. Atualiza a conta no banco (UPDATE)"]
-        K --> L["3. Cria registro de Movimentacao<br/>(tipo=SAQUE, destino=null)"]
-        L --> M["4. Salva a movimentação no banco (INSERT)"]
-        M --> N((Fim da Transação))
-    end
-
-    subgraph "Fim da Requisição"
-        N -- Commit --> O(("Sucesso<br/>Retorna 200 OK com 'Recibo'"))
-        D --> Z(("Falha<br/>Retorna Erro 404"))
-        F --> Z
-        H --> Z
-        J -- Falha no DB --> R((Rollback))
-        K -- Falha no DB --> R
-        L -- Falha no DB --> R
-        M -- Falha no DB --> R
-        R --> Y(("Falha<br/>Retorna Erro 500"))
-    end
+//## Fluxo da Operação de Transferência
+//
+//```mermaid
+//%% Fluxo da Operação de Transferência
+//graph TD
+//subgraph "Início da Requisição"
+//A["POST /contas/{id}/transferencia com DTO(valor, contaDestino)"]
+//end
+//
+//    subgraph "Camada de Serviço (@Transactional)"
+//        B[Busca conta de ORIGEM pelo ID]
+//        B --> C{Conta de origem existe?}
+//        C -- Não --> E["Lança Erro<br/>(EntidadeNaoEncontradaException)"]
+//        C -- Sim --> F[Busca conta de DESTINO pelo número]
+//        F --> G{Conta de destino existe?}
+//        G -- Não --> E
+//        G -- Sim --> H{Origem e Destino são diferentes?}
+ //       H -- Não --> I["Lança Erro de Negócio<br/>('Contas não podem ser iguais')"]
+ //       H -- Sim --> J{Conta de origem tem saldo suficiente?}
+ //       J -- Não --> K["Lança Erro de Negócio<br/>('Saldo insuficiente')"]
+//        J -- Sim --> L((Início da Transação))
+//        L --> M["1. Subtrai valor do saldo da conta de ORIGEM"]
+ //       M --> N["2. Adiciona valor ao saldo da conta de DESTINO"]
+ //       N --> O["3. Atualiza conta de ORIGEM no banco (UPDATE)"]
+ //       O --> P["4. Atualiza conta de DESTINO no banco (UPDATE)"]
+ //       P --> Q["5. Cria registro de Movimentacao<br/>(tipo=TRANSFERENCIA)"]
+ //       Q --> S["6. Salva a movimentação no banco (INSERT)"]
+ //       S --> T((Fim da Transação))
+ //   end
+//
+ //   subgraph "Fim da Requisição"
+  //      T -- Commit --> U(("Sucesso<br/>Retorna 200 OK com 'Recibo'"))
+   //     E --> Z(("Falha<br/>Retorna Erro 404"))
+   //     I --> Z
+   //     K --> Z
+   //     M -- Falha no DB --> R((Rollback))
+   //     N -- Falha no DB --> R
+   //     O -- Falha no DB --> R
+   //     P -- Falha no DB --> R
+   //     Q -- Falha no DB --> R
+   //     S -- Falha no DB --> R
+   //     R --> Y(("Falha<br/>Retorna Erro 500"))
+   // end
     
-    style O fill:#d4edda,stroke:#c3e6cb
-    style Z fill:#f8d7da,stroke:#f5c6cb
-    style Y fill:#f8d7da,stroke:#f5c6cb
-```
-
-## Fluxo da Operação de Transferência
-
-```mermaid
-%% Fluxo da Operação de Transferência
-graph TD
-subgraph "Início da Requisição"
-A["POST /contas/{id}/transferencia com DTO(valor, contaDestino)"]
-end
-
-    subgraph "Camada de Serviço (@Transactional)"
-        B[Busca conta de ORIGEM pelo ID]
-        B --> C{Conta de origem existe?}
-        C -- Não --> E["Lança Erro<br/>(EntidadeNaoEncontradaException)"]
-        C -- Sim --> F[Busca conta de DESTINO pelo número]
-        F --> G{Conta de destino existe?}
-        G -- Não --> E
-        G -- Sim --> H{Origem e Destino são diferentes?}
-        H -- Não --> I["Lança Erro de Negócio<br/>('Contas não podem ser iguais')"]
-        H -- Sim --> J{Conta de origem tem saldo suficiente?}
-        J -- Não --> K["Lança Erro de Negócio<br/>('Saldo insuficiente')"]
-        J -- Sim --> L((Início da Transação))
-        L --> M["1. Subtrai valor do saldo da conta de ORIGEM"]
-        M --> N["2. Adiciona valor ao saldo da conta de DESTINO"]
-        N --> O["3. Atualiza conta de ORIGEM no banco (UPDATE)"]
-        O --> P["4. Atualiza conta de DESTINO no banco (UPDATE)"]
-        P --> Q["5. Cria registro de Movimentacao<br/>(tipo=TRANSFERENCIA)"]
-        Q --> S["6. Salva a movimentação no banco (INSERT)"]
-        S --> T((Fim da Transação))
-    end
-
-    subgraph "Fim da Requisição"
-        T -- Commit --> U(("Sucesso<br/>Retorna 200 OK com 'Recibo'"))
-        E --> Z(("Falha<br/>Retorna Erro 404"))
-        I --> Z
-        K --> Z
-        M -- Falha no DB --> R((Rollback))
-        N -- Falha no DB --> R
-        O -- Falha no DB --> R
-        P -- Falha no DB --> R
-        Q -- Falha no DB --> R
-        S -- Falha no DB --> R
-        R --> Y(("Falha<br/>Retorna Erro 500"))
-    end
-    
-    style U fill:#d4edda,stroke:#c3e6cb
-    style Z fill:#f8d7da,stroke:#f5c6cb
-    style Y fill:#f8d7da,stroke:#f5c6cb
-```
+   // style U fill:#d4edda,stroke:#c3e6cb
+  //  style Z fill:#f8d7da,stroke:#f5c6cb
+  //  style Y fill:#f8d7da,stroke:#f5c6cb
+//```
