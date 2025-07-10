@@ -89,7 +89,6 @@ public class ContaDao {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sqlConta, Statement.RETURN_GENERATED_KEYS);
-            // AJUSTE AQUI: Usar o getter correto.
             ps.setString(1, conta.getNumero());
             ps.setString(2, conta.getAgencia());
             ps.setBigDecimal(3, conta.getSaldo());
@@ -173,8 +172,7 @@ public class ContaDao {
     public List<Conta> buscarPorClienteId(Integer clienteId) {
         String sql = BASE_SELECT_SQL + " WHERE c.id_cliente = ?";
         try {
-            // Usa o contaRowMapper para mapear cada linha do resultado para um objeto Conta
-            return jdbcTemplate.query(sql, contaRowMapper, clienteId);
+           return jdbcTemplate.query(sql, contaRowMapper, clienteId);
         } catch (DataAccessException ex) {
             logger.error("Erro ao buscar contas para o cliente ID: {}", clienteId, ex);
             throw new RepositorioException("Erro ao buscar contas do cliente.", ex);

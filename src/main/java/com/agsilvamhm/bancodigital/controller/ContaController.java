@@ -15,7 +15,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/v1/contas")
+@RequestMapping(value = "/contas")
 public class ContaController {
 
     private final ContaService contaService;
@@ -65,7 +65,7 @@ public class ContaController {
     }
 
     @PostMapping("/{id}/deposito")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')") // Apenas administradores podem simular um depósito
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Movimentacao> realizarDeposito(
             @PathVariable Long id,
             @Valid @RequestBody DepositoRequestDTO request) {
@@ -75,7 +75,7 @@ public class ContaController {
     }
 
     @PostMapping("/{id}/saque")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or @authService.podeAcessarConta(#id)")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Movimentacao> realizarSaque(
             @PathVariable Long id,
             @Valid @RequestBody OperacaoContaDTO request) {

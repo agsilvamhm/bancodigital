@@ -106,3 +106,59 @@ ALTER TABLE "movimentacao" ADD CONSTRAINT "check_movimentacao_tipo"
 CHECK ("tipo" IN ('DEPOSITO', 'SAQUE', 'TRANSFERENCIA', 'PIX', 'TAXA_MANUTENCAO', 'RENDIMENTO'));
 
 -- Povoar tabelas para os testes  --
+
+INSERT INTO "endereco" (rua, numero, complemento, cidade, estado, cep)
+VALUES ('Rua da Consolação', 1500, 'Bloco B, Apto 54', 'São Paulo', 'SP', '01301-100');
+
+INSERT INTO "cliente" (cpf, nome, data_nascimento, categoria, id_endereco)
+VALUES ('980.246.810-05', 'Ricardo Souza Costa', '1992-11-10', 'SUPER', 1);
+
+-- Registro 2
+INSERT INTO "endereco" (rua, numero, complemento, cidade, estado, cep) VALUES ('Avenida Paulista', 2000, 'Andar 10', 'São Paulo', 'SP', '01310-200');
+INSERT INTO "cliente" (cpf, nome, data_nascimento, categoria, id_endereco) VALUES ('123.456.789-10', 'Ana Pereira Lima', '1985-05-20', 'COMUM', 2);
+
+-- Registro 3
+INSERT INTO "endereco" (rua, numero, complemento, cidade, estado, cep) VALUES ('Rua das Laranjeiras', 500, 'Casa', 'Rio de Janeiro', 'RJ', '22240-003');
+INSERT INTO "cliente" (cpf, nome, data_nascimento, categoria, id_endereco) VALUES ('234.567.890-11', 'Bruno Ferreira Alves', '1998-02-15', 'SUPER', 3);
+
+-- Registro 4
+INSERT INTO "endereco" (rua, numero, complemento, cidade, estado, cep) VALUES ('Avenida Boa Viagem', 340, 'Apto 801', 'Recife', 'PE', '51011-000');
+INSERT INTO "cliente" (cpf, nome, data_nascimento, categoria, id_endereco) VALUES ('345.678.901-12', 'Carla Dias Martins', '1979-09-30', 'PREMIUM', 4);
+
+-- Registro 5
+INSERT INTO "endereco" (rua, numero, complemento, cidade, estado, cep) VALUES ('Rua 24 Horas', 123, NULL, 'Curitiba', 'PR', '80010-010');
+INSERT INTO "cliente" (cpf, nome, data_nascimento, categoria, id_endereco) VALUES ('456.789.012-13', 'Daniel Oliveira Santos', '2001-07-11', 'COMUM', 5);
+
+-- Registro 6
+INSERT INTO "endereco" (rua, numero, complemento, cidade, estado, cep) VALUES ('Praça da Liberdade', 10, 'Prédio Histórico', 'Belo Horizonte', 'MG', '30140-010');
+INSERT INTO "cliente" (cpf, nome, data_nascimento, categoria, id_endereco) VALUES ('567.890.123-14', 'Elisa Gomes Ribeiro', '1995-12-01', 'SUPER', 6);
+
+-- Cliente 1 (ID: 1)
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('1001-1', '0001', 1500.75, 1);
+INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (1, 25.00); -- id_conta = 1
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('1001-9', '0001', 10250.00, 1);
+INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (2, 0.0050); -- id_conta = 2
+
+-- Cliente 2 (ID: 2)
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('2002-2', '0001', 850.00, 2);
+INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (3, 20.00); -- id_conta = 3
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('2002-8', '0001', 25000.80, 2);
+INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (4, 0.0055); -- id_conta = 4
+
+-- Cliente 3 (ID: 3)
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('3003-3', '0001', 3200.50, 3);
+INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (5, 25.00); -- id_conta = 5
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('3003-7', '0001', 12345.67, 3);
+INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (6, 0.0060); -- id_conta = 6
+
+-- Cliente 4 (ID: 4)
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('4004-4', '0001', 15000.00, 4);
+INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (7, 35.00); -- id_conta = 7
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('4004-6', '0001', 75000.00, 4);
+INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (8, 0.0065); -- id_conta = 8
+
+-- Cliente 5 (ID: 5)
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('5005-5', '0001', 980.20, 5);
+INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (9, 15.00); -- id_conta = 9
+INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('5005-4', '0001', 5400.00, 5);
+INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (10, 0.0050); -- id_conta = 10

@@ -9,13 +9,13 @@ import java.math.BigDecimal;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "tipoConta" // Este campo será adicionado no JSON para indicar o tipo
+        property = "tipoConta"
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ContaCorrente.class, name = "CORRENTE"),
         @JsonSubTypes.Type(value = ContaPoupanca.class, name = "POUPANCA")
 })
-public abstract class Conta { // CORREÇÃO: A classe base deve ser abstrata.
+public abstract class Conta {
     private Long id;
 
     @JsonBackReference

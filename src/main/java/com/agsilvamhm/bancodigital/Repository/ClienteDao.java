@@ -46,7 +46,7 @@ public class ClienteDao {
     private static final String INSERT_CLIENTE = "INSERT INTO cliente (cpf, nome, data_nascimento, categoria, id_endereco) VALUES (?, ?, ?, ?, ?)";
     private static final String SELECT_BY_ID = BASE_SELECT_SQL + "WHERE c.id = ?";
     private static final String SELECT_ALL = BASE_SELECT_SQL + "ORDER BY c.nome, cta.id";
-    private static final String UPDATE_CLIENTE = "UPDATE cliente SET cpf = ?, nome = ?, data_nascimento = ?, categoria = ? WHERE id = ?";
+    private static final String UPDATE_CLIENTE = "UPDATE cliente SET cpf = ?, nome = ?, data_nascimento = ?, categoria = ?, id_endereco = ? WHERE id = ?";
     private static final String DELETE_BY_ID = "DELETE FROM cliente WHERE id = ?";
     private static final String SELECT_BY_CPF = BASE_SELECT_SQL + "WHERE c.cpf = ?";
 
@@ -211,9 +211,7 @@ public class ClienteDao {
 
     public Optional<Cliente> buscarPorCpf(String cpf) {
         try {
-            // Reutiliza o mesmo ResultSetExtractor, pois a estrutura da query é a mesma
             List<Cliente> clientes = jdbcTemplate.query(SELECT_BY_CPF, new ClienteResultSetExtractor(), cpf);
-            // Retorna o primeiro elemento da lista, se a lista não estiver vazia
             return clientes.stream().findFirst();
         } catch (DataAccessException ex) {
             logger.error("Erro de acesso a dados ao buscar cliente pelo CPF: {}", cpf, ex);
