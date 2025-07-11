@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.Repository;
+package com.agsilvamhm.bancodigital.repository;
 
 import com.agsilvamhm.bancodigital.model.Cartao;
 import com.agsilvamhm.bancodigital.model.SeguroCartao;

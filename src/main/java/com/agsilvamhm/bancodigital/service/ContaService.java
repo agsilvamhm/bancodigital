@@ -1,8 +1,8 @@
 package com.agsilvamhm.bancodigital.service;
 
-import com.agsilvamhm.bancodigital.Repository.ClienteDao;
-import com.agsilvamhm.bancodigital.Repository.ContaDao;
-import com.agsilvamhm.bancodigital.Repository.MovimentacaoDao;
+import com.agsilvamhm.bancodigital.repository.ClienteDao;
+import com.agsilvamhm.bancodigital.repository.ContaDao;
+import com.agsilvamhm.bancodigital.repository.MovimentacaoDao;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RegraNegocioException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
@@ -46,24 +46,11 @@ public class ContaService {
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente com ID " + request.clienteId() + " não encontrado."));
 
         Conta novaConta;
+
         if (TipoConta.CORRENTE.equals(request.tipoConta())) {
-            // AJUSTE AQUI: Validar que a taxa de manutenção não é nula para conta corrente.
-            if (request.taxaManutencao() == null) {
-                throw new IllegalArgumentException("A taxa de manutenção é obrigatória para Conta Corrente.");
-            }
-            ContaCorrente cc = new ContaCorrente();
-            cc.setTaxaManutencaoMensal(request.taxaManutencao());
-            novaConta = cc;
-
+            novaConta = new ContaCorrente();
         } else if (TipoConta.POUPANCA.equals(request.tipoConta())) {
-            // AJUSTE AQUI: Validar que a taxa de rendimento não é nula para conta poupança.
-            if (request.taxaRendimento() == null) {
-                throw new IllegalArgumentException("A taxa de rendimento é obrigatória para Conta Poupança.");
-            }
-            ContaPoupanca cp = new ContaPoupanca();
-            cp.setTaxaRendimentoMensal(request.taxaRendimento());
-            novaConta = cp;
-
+            novaConta = new ContaPoupanca();
         } else {
             throw new IllegalArgumentException("Tipo de conta inválido: " + request.tipoConta());
         }
@@ -71,7 +58,7 @@ public class ContaService {
         novaConta.setCliente(cliente);
         novaConta.setNumero(request.numero());
         novaConta.setAgencia(request.agencia());
-        novaConta.setSaldo(BigDecimal.ZERO);
+        novaConta.setSaldo(BigDecimal.ZERO); // Contas novas começam com saldo zero.
 
         try {
             Conta contaSalva = contaDao.salvar(novaConta);
@@ -83,7 +70,6 @@ public class ContaService {
         }
     }
 
-    // ... O resto da classe (buscarPorId, buscarPorNumero, listar, atualizar, validar) está correto ...
     public Conta buscarPorId(Long id) {
         Objects.requireNonNull(id, "O ID da conta não pode ser nulo.");
         return contaDao.buscarPorId(id)
@@ -123,290 +109,192 @@ public class ContaService {
 
     public BigDecimal consultarSaldo(Long id) {
         logger.info("Consultando saldo para a conta ID: {}", id);
-        // 1. Reutiliza o método buscarPorId que já trata o caso de não encontrar a conta.
         Conta conta = this.buscarPorId(id);
-
-        // 2. Retorna apenas o saldo do objeto encontrado.
         return conta.getSaldo();
     }
 
     @Transactional
     public Movimentacao realizarTransferencia(Long idContaOrigem, TransferenciaRequestDTO request) {
-        // 1. Validações de negócio
         if (request.valor().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RegraNegocioException("O valor da transferência deve ser positivo.");
         }
-
-        // 2. Busca as contas de origem e destino
         Conta contaOrigem = buscarPorId(idContaOrigem);
         Conta contaDestino = contaDao.buscarPorNumero(request.contaDestinoNumero())
                 .orElseThrow(() -> new EntidadeNaoEncontradaException(
                         "Conta de destino com número " + request.contaDestinoNumero() + " não encontrada."));
-
         if (contaOrigem.getId().equals(contaDestino.getId())) {
             throw new RegraNegocioException("A conta de origem e destino não podem ser a mesma.");
         }
-
-        // 3. Verifica o saldo
         if (contaOrigem.getSaldo().compareTo(request.valor()) < 0) {
             throw new RegraNegocioException("Saldo insuficiente na conta de origem.");
         }
-
-        // 4. Realiza a operação de débito e crédito
         contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(request.valor()));
         contaDestino.setSaldo(contaDestino.getSaldo().add(request.valor()));
-
-        // 5. Atualiza as duas contas no banco de dados
         contaDao.atualizar(contaOrigem);
         contaDao.atualizar(contaDestino);
-
-        // 6. Cria e salva o registro da movimentação
         Movimentacao movimentacao = new Movimentacao();
         movimentacao.setTipo(TipoMovimentacao.TRANSFERENCIA);
-        movimentacao.setValor(request.valor().doubleValue()); // Ajuste de BigDecimal para double
+        movimentacao.setValor(request.valor().doubleValue());
         movimentacao.setDataHora(LocalDateTime.now());
         movimentacao.setContaOrigem(contaOrigem);
         movimentacao.setContaDestino(contaDestino);
         movimentacao.setDescricao(request.descricao());
-
         movimentacaoDao.salvar(movimentacao);
-
         logger.info("Transferência de R$ {} da conta #{} para #{} realizada com sucesso.",
                 request.valor(), contaOrigem.getNumero(), contaDestino.getNumero());
-
-        // Retorna o objeto da movimentação como um "recibo" da transação.
         return movimentacao;
     }
 
     @Transactional
     public Movimentacao realizarDeposito(Long idConta, DepositoRequestDTO request) {
-        // 1. Busca a conta que receberá o depósito.
-        // O método buscarPorId já lança uma exceção se a conta não for encontrada.
         Conta conta = buscarPorId(idConta);
-
-        // 2. Adiciona o valor ao saldo da conta.
         BigDecimal novoSaldo = conta.getSaldo().add(request.valor());
         conta.setSaldo(novoSaldo);
-
-        // 3. Atualiza a conta no banco de dados.
         contaDao.atualizar(conta);
-
-        // 4. Cria e salva o registro da movimentação de depósito.
         Movimentacao movimentacao = new Movimentacao();
         movimentacao.setTipo(TipoMovimentacao.DEPOSITO);
         movimentacao.setValor(request.valor().doubleValue());
         movimentacao.setDataHora(LocalDateTime.now());
-        movimentacao.setContaOrigem(null); // Depósitos não têm uma conta de origem no sistema.
+        movimentacao.setContaOrigem(null);
         movimentacao.setContaDestino(conta);
         movimentacao.setDescricao(request.descricao() != null ? request.descricao() : "Depósito em conta");
-
-        // Reutilizamos o MovimentacaoDao que já existe.
         movimentacaoDao.salvar(movimentacao);
-
         logger.info("Depósito de R$ {} na conta #{} realizado com sucesso.", request.valor(), conta.getNumero());
-
-        // Retorna a movimentação como "recibo".
         return movimentacao;
     }
 
     @Transactional
     public Movimentacao realizarSaque(Long idConta, OperacaoContaDTO request) {
-        // 1. Busca a conta da qual o saque será feito.
         Conta conta = buscarPorId(idConta);
-
-        // 2. VALIDAÇÃO MAIS IMPORTANTE: Verificar se há saldo suficiente.
         if (conta.getSaldo().compareTo(request.valor()) < 0) {
             throw new RegraNegocioException("Saldo insuficiente para realizar o saque.");
         }
-
-        // 3. Debita o valor do saldo da conta.
         BigDecimal novoSaldo = conta.getSaldo().subtract(request.valor());
         conta.setSaldo(novoSaldo);
-
-        // 4. Atualiza a conta no banco de dados.
         contaDao.atualizar(conta);
-
-        // 5. Cria e salva o registro da movimentação de saque.
         Movimentacao movimentacao = new Movimentacao();
-        movimentacao.setTipo(TipoMovimentacao.SAQUE); // Certifique-se que seu enum tem SAQUE
+        movimentacao.setTipo(TipoMovimentacao.SAQUE);
         movimentacao.setValor(request.valor().doubleValue());
         movimentacao.setDataHora(LocalDateTime.now());
         movimentacao.setContaOrigem(conta);
-        movimentacao.setContaDestino(null); // Saques não têm conta de destino.
+        movimentacao.setContaDestino(null);
         movimentacao.setDescricao(request.descricao() != null ? request.descricao() : "Saque em conta");
-
-        // Reutilizamos o MovimentacaoDao. A correção que fizemos para depósitos já o preparou para isso.
         movimentacaoDao.salvar(movimentacao);
-
         logger.info("Saque de R$ {} da conta #{} realizado com sucesso.", request.valor(), conta.getNumero());
-
         return movimentacao;
     }
 
     @Transactional
     public Movimentacao realizarPix(Long idContaOrigem, PixRequestDTO request) {
-        // 1. Busca a conta de origem
         Conta contaOrigem = buscarPorId(idContaOrigem);
-
-        // 2. RESOLUÇÃO DA CHAVE PIX: Busca o cliente de destino pelo CPF (nossa Chave Pix)
         Cliente clienteDestino = clienteDao.buscarPorCpf(request.chavePix())
                 .orElseThrow(() -> new EntidadeNaoEncontradaException(
                         "Nenhuma conta encontrada para a Chave PIX (CPF) fornecida."));
-
-        // 3. Busca a primeira conta associada a esse cliente de destino.
-        // Em um sistema real, poderia haver uma lógica para escolher a conta principal.
         List<Conta> contasDestino = contaDao.buscarPorClienteId(clienteDestino.getId());
         if (contasDestino.isEmpty()) {
             throw new EntidadeNaoEncontradaException(
                     "O destinatário da Chave PIX não possui uma conta ativa.");
         }
-        Conta contaDestino = contasDestino.get(0); // Pega a primeira conta encontrada
-
-        // 4. Validações de negócio (saldo, mesma conta, etc.)
+        Conta contaDestino = contasDestino.get(0);
         if (contaOrigem.getId().equals(contaDestino.getId())) {
             throw new RegraNegocioException("A conta de origem e destino não podem ser a mesma.");
         }
         if (contaOrigem.getSaldo().compareTo(request.valor()) < 0) {
             throw new RegraNegocioException("Saldo insuficiente para realizar o PIX.");
         }
-
-        // 5. Realiza a operação de débito e crédito
         contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(request.valor()));
         contaDestino.setSaldo(contaDestino.getSaldo().add(request.valor()));
-
-        // 6. Atualiza as duas contas no banco de dados
         contaDao.atualizar(contaOrigem);
         contaDao.atualizar(contaDestino);
-
-        // 7. Cria e salva o registro da movimentação
         Movimentacao movimentacao = new Movimentacao();
-        movimentacao.setTipo(TipoMovimentacao.PIX); // Certifique-se que seu enum tem PIX
+        movimentacao.setTipo(TipoMovimentacao.PIX);
         movimentacao.setValor(request.valor().doubleValue());
         movimentacao.setDataHora(LocalDateTime.now());
         movimentacao.setContaOrigem(contaOrigem);
         movimentacao.setContaDestino(contaDestino);
         movimentacao.setDescricao(request.descricao());
-
         movimentacaoDao.salvar(movimentacao);
-
         logger.info("PIX de R$ {} da conta #{} para a Chave Pix '{}' realizado com sucesso.",
                 request.valor(), contaOrigem.getNumero(), request.chavePix());
-
         return movimentacao;
     }
 
     public List<Movimentacao> listarMovimentacoesPorConta(Long idConta) {
         logger.info("Buscando extrato para a conta ID: {}", idConta);
-
-        // 1. Primeiro, garantimos que a conta existe.
-        //    O método buscarPorId já lança EntidadeNaoEncontradaException se não achar.
         this.buscarPorId(idConta);
-
-        // 2. Se a conta existe, chamamos o DAO para buscar as movimentações.
         List<Movimentacao> movimentacoes = movimentacaoDao.buscarPorContaId(idConta);
-
         logger.info("Encontradas {} movimentações para a conta ID: {}", movimentacoes.size(), idConta);
         return movimentacoes;
     }
 
-    // Dentro da classe ContaService
-// ... (outros imports e métodos) ...
-
-    /**
-     * Aplica a taxa de manutenção mensal a uma conta corrente específica.
-     * A operação é transacional: debita o saldo e cria um registro de movimentação.
-     *
-     * @param idConta O ID da conta corrente.
-     * @return O objeto Movimentacao que representa a cobrança da taxa.
-     * @throws EntidadeNaoEncontradaException se a conta não for encontrada.
-     * @throws RegraNegocioException se a conta não for do tipo ContaCorrente.
-     */
     @Transactional
     public Movimentacao aplicarTaxaManutencao(Long idConta) {
         logger.info("Iniciando aplicação de taxa de manutenção para a conta ID: {}", idConta);
-
-        // 1. Busca a conta. O método buscarPorId já trata o caso de não encontrar.
         Conta conta = this.buscarPorId(idConta);
-
-        // 2. VALIDAÇÃO: Garante que a operação só ocorra em Contas Corrente.
         if (!(conta instanceof ContaCorrente)) {
             throw new RegraNegocioException("A taxa de manutenção só pode ser aplicada a Contas Corrente.");
         }
-
         ContaCorrente contaCorrente = (ContaCorrente) conta;
-        BigDecimal taxa = BigDecimal.valueOf(contaCorrente.getTaxaManutencaoMensal());
-
-        // 3. Valida se a taxa tem um valor a ser cobrado
-        if (taxa.compareTo(BigDecimal.ZERO) <= 0) {
-            logger.warn("Taxa de manutenção para a conta #{} é zero ou negativa. Nenhuma operação realizada.", conta.getNumero());
-            // Poderia retornar null ou uma exceção, dependendo da regra de negócio.
-            // Vamos lançar uma exceção para ser mais explícito.
-            throw new RegraNegocioException("O valor da taxa de manutenção é zero ou inválido.");
+        Cliente cliente = contaCorrente.getCliente();
+        if (cliente == null || cliente.getCategoria() == null) {
+            throw new RegraNegocioException("A conta não possui um cliente ou categoria associada.");
         }
-
-        // 4. Debita o valor do saldo
+        CategoriaCliente categoria = cliente.getCategoria();
+        BigDecimal taxa = categoria.getTaxaManutencao();
+        if (taxa.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.info("Cliente da conta #{} é da categoria {} e está isento de taxa.", conta.getNumero(), categoria.getDescricao());
+            return null;
+        }
+        if (contaCorrente.getSaldo().compareTo(taxa) < 0) {
+            throw new RegraNegocioException("Saldo insuficiente para cobrança da taxa de manutenção.");
+        }
         contaCorrente.setSaldo(contaCorrente.getSaldo().subtract(taxa));
         contaDao.atualizar(contaCorrente);
-        logger.info("Saldo da conta #{} atualizado após cobrança de taxa.", conta.getNumero());
-
-        // 5. Cria e salva o registro da movimentação para o extrato
+        logger.info("Saldo da conta #{} atualizado após cobrança de taxa de R$ {}.", conta.getNumero(), taxa);
         Movimentacao movimentacaoTaxa = new Movimentacao();
         movimentacaoTaxa.setTipo(TipoMovimentacao.TAXA_MANUTENCAO);
         movimentacaoTaxa.setValor(taxa.doubleValue());
         movimentacaoTaxa.setDataHora(LocalDateTime.now());
-        movimentacaoTaxa.setDescricao("Cobrança de taxa de manutenção mensal");
-        movimentacaoTaxa.setContaOrigem(contaCorrente); // A própria conta é a origem do débito
+        movimentacaoTaxa.setDescricao("Cobrança de taxa de manutenção mensal - Categoria: " + categoria.getDescricao());
+        movimentacaoTaxa.setContaOrigem(contaCorrente);
         movimentacaoTaxa.setContaDestino(null);
-
         movimentacaoDao.salvar(movimentacaoTaxa);
-        logger.info("Movimentação de taxa de manutenção para conta #{} registrada com sucesso.", conta.getNumero());
-
+        logger.info("Movimentação de taxa registrada para conta #{}.", conta.getNumero());
         return movimentacaoTaxa;
     }
 
     @Transactional
     public Movimentacao aplicarRendimentos(Long idConta) {
         logger.info("Iniciando aplicação de rendimentos para a conta ID: {}", idConta);
-
-        // 1. Busca a conta.
         Conta conta = this.buscarPorId(idConta);
-
-        // 2. VALIDAÇÃO: Garante que a operação só ocorra em Contas Poupança.
         if (!(conta instanceof ContaPoupanca)) {
             throw new RegraNegocioException("Rendimentos só podem ser aplicados a Contas Poupança.");
         }
-
         ContaPoupanca contaPoupanca = (ContaPoupanca) conta;
-        BigDecimal taxaRendimento = BigDecimal.valueOf(contaPoupanca.getTaxaRendimentoMensal());
-
-        // 3. Calcula o valor do rendimento (saldo * taxa)
-        // Usamos BigDecimal para precisão monetária.
-        BigDecimal valorRendimento = contaPoupanca.getSaldo().multiply(taxaRendimento)
-                .setScale(2, RoundingMode.HALF_EVEN); // Arredonda para 2 casas decimais
-
-        if (valorRendimento.compareTo(BigDecimal.ZERO) <= 0) {
-            logger.warn("Rendimento para a conta #{} resultou em zero ou menos. Nenhuma operação realizada.", conta.getNumero());
-            throw new RegraNegocioException("O valor do rendimento calculado é zero ou inválido.");
+        Cliente cliente = contaPoupanca.getCliente();
+        if (cliente == null || cliente.getCategoria() == null) {
+            throw new RegraNegocioException("A conta não possui um cliente ou categoria associada.");
         }
-
-        // 4. Credita o valor ao saldo
+        CategoriaCliente categoria = cliente.getCategoria();
+        BigDecimal taxaRendimentoMensal = categoria.getTaxaRendimentoMensalEquivalente();
+        BigDecimal valorRendimento = contaPoupanca.getSaldo().multiply(taxaRendimentoMensal)
+                .setScale(2, RoundingMode.HALF_EVEN);
+        if (valorRendimento.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.warn("Rendimento para a conta #{} resultou em R$ 0,00. Nenhuma operação realizada.", conta.getNumero());
+            return null;
+        }
         contaPoupanca.setSaldo(contaPoupanca.getSaldo().add(valorRendimento));
         contaDao.atualizar(contaPoupanca);
-        logger.info("Saldo da conta #{} atualizado após aplicação de rendimentos.", conta.getNumero());
-
-        // 5. Cria e salva o registro da movimentação
+        logger.info("Saldo da conta #{} atualizado após aplicação de rendimentos no valor de R$ {}.", conta.getNumero(), valorRendimento);
         Movimentacao movimentacaoRendimento = new Movimentacao();
         movimentacaoRendimento.setTipo(TipoMovimentacao.RENDIMENTO);
         movimentacaoRendimento.setValor(valorRendimento.doubleValue());
         movimentacaoRendimento.setDataHora(LocalDateTime.now());
-        movimentacaoRendimento.setDescricao("Crédito de rendimento mensal");
+        movimentacaoRendimento.setDescricao("Crédito de rendimento mensal - Categoria: " + categoria.getDescricao());
         movimentacaoRendimento.setContaOrigem(null);
-        movimentacaoRendimento.setContaDestino(contaPoupanca); // A própria conta é o destino do crédito
-
+        movimentacaoRendimento.setContaDestino(contaPoupanca);
         movimentacaoDao.salvar(movimentacaoRendimento);
-        logger.info("Movimentação de rendimento para conta #{} registrada com sucesso.", conta.getNumero());
-
+        logger.info("Movimentação de rendimento registrada para conta #{}.", conta.getNumero());
         return movimentacaoRendimento;
     }
-
 }

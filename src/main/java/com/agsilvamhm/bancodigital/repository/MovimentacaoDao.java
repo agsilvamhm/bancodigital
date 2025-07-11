@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.Repository;
+package com.agsilvamhm.bancodigital.repository;
 
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
 import com.agsilvamhm.bancodigital.model.Conta;

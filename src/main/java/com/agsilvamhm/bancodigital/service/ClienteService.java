@@ -2,11 +2,10 @@ package com.agsilvamhm.bancodigital.service;
 
 import com.agsilvamhm.bancodigital.controller.exception.CpfDuplicadoException;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
-import com.agsilvamhm.bancodigital.controller.exception.RegraNegocioException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
-import com.agsilvamhm.bancodigital.Repository.EnderecoDao;
+import com.agsilvamhm.bancodigital.repository.EnderecoDao;
 import com.agsilvamhm.bancodigital.model.*;
-import com.agsilvamhm.bancodigital.Repository.ClienteDao;
+import com.agsilvamhm.bancodigital.repository.ClienteDao;
 
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;

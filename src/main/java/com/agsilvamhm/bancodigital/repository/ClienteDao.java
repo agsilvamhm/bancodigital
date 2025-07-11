@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.Repository;
+package com.agsilvamhm.bancodigital.repository;
 
 import com.agsilvamhm.bancodigital.model.CategoriaCliente;
 import com.agsilvamhm.bancodigital.model.Cliente;
@@ -26,22 +26,16 @@ import java.util.*;
 public class ClienteDao {
 
     private static final Logger logger = LoggerFactory.getLogger(ClienteDao.class);
-    private static final String BASE_SELECT_SQL =
-            "SELECT " +
-                    "c.id as cliente_id, c.cpf, c.nome, c.data_nascimento, c.categoria, " +
-                    "e.id as endereco_id, e.rua, e.numero as endereco_numero, e.complemento, e.cidade, e.estado, e.cep, " +
-                    "cta.id as conta_id, cta.numero as conta_numero, cta.agencia, cta.saldo, " +
-                    "cc.taxa_manutencao_mensal, " +
-                    "cp.taxa_rendimento_mensal, " +
-                    "CASE " +
-                    "    WHEN cc.id_conta IS NOT NULL THEN 'CORRENTE' " +
-                    "    WHEN cp.id_conta IS NOT NULL THEN 'POUPANCA' " +
-                    "END as tipo_conta " +
-                    "FROM cliente c " +
-                    "LEFT JOIN endereco e ON c.id_endereco = e.id " +
-                    "LEFT JOIN conta cta ON c.id = cta.id_cliente " +
-                    "LEFT JOIN conta_corrente cc ON cta.id = cc.id_conta " +
-                    "LEFT JOIN conta_poupanca cp ON cta.id = cp.id_conta ";
+
+    private static final String BASE_SELECT_SQL = """
+            SELECT
+                c.id as cliente_id, c.cpf, c.nome, c.data_nascimento, c.categoria,
+                e.id as endereco_id, e.rua, e.numero as endereco_numero, e.complemento, e.cidade, e.estado, e.cep,
+                cta.id as conta_id, cta.numero as conta_numero, cta.agencia, cta.saldo, cta.tipo_conta
+            FROM cliente c
+            LEFT JOIN endereco e ON c.id_endereco = e.id
+            LEFT JOIN conta cta ON c.id = cta.id_cliente
+            """;
 
     private static final String INSERT_CLIENTE = "INSERT INTO cliente (cpf, nome, data_nascimento, categoria, id_endereco) VALUES (?, ?, ?, ?, ?)";
     private static final String SELECT_BY_ID = BASE_SELECT_SQL + "WHERE c.id = ?";
@@ -139,6 +133,16 @@ public class ClienteDao {
         }
     }
 
+    public Optional<Cliente> buscarPorCpf(String cpf) {
+        try {
+            List<Cliente> clientes = jdbcTemplate.query(SELECT_BY_CPF, new ClienteResultSetExtractor(), cpf);
+            return clientes.stream().findFirst();
+        } catch (DataAccessException ex) {
+            logger.error("Erro de acesso a dados ao buscar cliente pelo CPF: {}", cpf, ex);
+            throw new RepositorioException("Erro ao buscar cliente por CPF.", ex);
+        }
+    }
+
     private static class ClienteResultSetExtractor implements ResultSetExtractor<List<Cliente>> {
         @Override
         public List<Cliente> extractData(ResultSet rs) throws SQLException, DataAccessException {
@@ -158,9 +162,7 @@ public class ClienteDao {
                         if (rs.getString("categoria") != null) {
                             novoCliente.setCategoria(CategoriaCliente.valueOf(rs.getString("categoria")));
                         }
-
                         novoCliente.setContas(new ArrayList<>());
-
                         if (rs.getInt("endereco_id") != 0) {
                             Endereco endereco = new Endereco();
                             endereco.setId(rs.getInt("endereco_id"));
@@ -178,18 +180,14 @@ public class ClienteDao {
                     }
                 });
 
-                if (rs.getInt("conta_id") != 0) {
+                if (rs.getObject("conta_id") != null) { // Usar getObject para checar NULL
                     String tipoConta = rs.getString("tipo_conta");
                     Conta conta;
 
                     if ("CORRENTE".equals(tipoConta)) {
-                        ContaCorrente cc = new ContaCorrente();
-                        cc.setTaxaManutencaoMensal(rs.getDouble("taxa_manutencao_mensal"));
-                        conta = cc;
+                        conta = new ContaCorrente();
                     } else if ("POUPANCA".equals(tipoConta)) {
-                        ContaPoupanca cp = new ContaPoupanca();
-                        cp.setTaxaRendimentoMensal(rs.getDouble("taxa_rendimento_mensal"));
-                        conta = cp;
+                        conta = new ContaPoupanca();
                     } else {
                         continue;
                     }
@@ -198,7 +196,7 @@ public class ClienteDao {
                     conta.setNumero(rs.getString("conta_numero"));
                     conta.setAgencia(rs.getString("agencia"));
                     conta.setSaldo(rs.getBigDecimal("saldo"));
-                    conta.setCliente(cliente); // Associa a conta ao cliente
+                    conta.setCliente(cliente);
 
                     if (cliente.getContas().stream().noneMatch(c -> c.getId().equals(conta.getId()))) {
                         cliente.getContas().add(conta);
@@ -206,16 +204,6 @@ public class ClienteDao {
                 }
             }
             return new ArrayList<>(clienteMap.values());
-        }
-    }
-
-    public Optional<Cliente> buscarPorCpf(String cpf) {
-        try {
-            List<Cliente> clientes = jdbcTemplate.query(SELECT_BY_CPF, new ClienteResultSetExtractor(), cpf);
-            return clientes.stream().findFirst();
-        } catch (DataAccessException ex) {
-            logger.error("Erro de acesso a dados ao buscar cliente pelo CPF: {}", cpf, ex);
-            throw new RepositorioException("Erro ao buscar cliente por CPF.", ex);
         }
     }
 }

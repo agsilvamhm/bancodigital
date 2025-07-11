@@ -25,6 +25,7 @@ CREATE TABLE "cliente" (
 
 CREATE TABLE "conta" (
   "id" INT AUTO_INCREMENT PRIMARY KEY,
+  "tipo_conta" VARCHAR(10) NOT NULL CHECK ("tipo_conta" IN ('CORRENTE', 'POUPANCA')),
   "numero" VARCHAR(20) UNIQUE NOT NULL,
   "agencia" VARCHAR(10) NOT NULL,
   "saldo" DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
@@ -32,24 +33,6 @@ CREATE TABLE "conta" (
   CONSTRAINT "fk_conta_cliente"
     FOREIGN KEY("id_cliente")
     REFERENCES "cliente"("id")
-    ON DELETE CASCADE
-);
-
-CREATE TABLE "conta_corrente" (
-  "id_conta" INT PRIMARY KEY,
-  "taxa_manutencao_mensal" DECIMAL(10, 2) NOT NULL,
-  CONSTRAINT "fk_cc_conta"
-    FOREIGN KEY("id_conta")
-    REFERENCES "conta"("id")
-    ON DELETE CASCADE
-);
-
-CREATE TABLE "conta_poupanca" (
-  "id_conta" INT PRIMARY KEY,
-  "taxa_rendimento_mensal" DECIMAL(5, 4) NOT NULL,
-  CONSTRAINT "fk_cp_conta"
-    FOREIGN KEY("id_conta")
-    REFERENCES "conta"("id")
     ON DELETE CASCADE
 );
 
@@ -134,31 +117,21 @@ INSERT INTO "endereco" (rua, numero, complemento, cidade, estado, cep) VALUES ('
 INSERT INTO "cliente" (cpf, nome, data_nascimento, categoria, id_endereco) VALUES ('567.890.123-14', 'Elisa Gomes Ribeiro', '1995-12-01', 'SUPER', 6);
 
 -- Cliente 1 (ID: 1)
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('1001-1', '0001', 1500.75, 1);
-INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (1, 25.00); -- id_conta = 1
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('1001-9', '0001', 10250.00, 1);
-INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (2, 0.0050); -- id_conta = 2
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('CORRENTE', '1001-1', '0001', 1500.75, 1);
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('POUPANCA', '1001-9', '0001', 10250.00, 1);
 
 -- Cliente 2 (ID: 2)
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('2002-2', '0001', 850.00, 2);
-INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (3, 20.00); -- id_conta = 3
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('2002-8', '0001', 25000.80, 2);
-INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (4, 0.0055); -- id_conta = 4
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('CORRENTE', '2002-2', '0001', 850.00, 2);
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('POUPANCA', '2002-8', '0001', 25000.80, 2);
 
 -- Cliente 3 (ID: 3)
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('3003-3', '0001', 3200.50, 3);
-INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (5, 25.00); -- id_conta = 5
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('3003-7', '0001', 12345.67, 3);
-INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (6, 0.0060); -- id_conta = 6
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('CORRENTE', '3003-3', '0001', 3200.50, 3);
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('POUPANCA', '3003-7', '0001', 12345.67, 3);
 
 -- Cliente 4 (ID: 4)
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('4004-4', '0001', 15000.00, 4);
-INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (7, 35.00); -- id_conta = 7
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('4004-6', '0001', 75000.00, 4);
-INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (8, 0.0065); -- id_conta = 8
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('CORRENTE', '4004-4', '0001', 15000.00, 4);
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('POUPANCA', '4004-6', '0001', 75000.00, 4);
 
 -- Cliente 5 (ID: 5)
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('5005-5', '0001', 980.20, 5);
-INSERT INTO "conta_corrente" (id_conta, taxa_manutencao_mensal) VALUES (9, 15.00); -- id_conta = 9
-INSERT INTO "conta" (numero, agencia, saldo, id_cliente) VALUES ('5005-4', '0001', 5400.00, 5);
-INSERT INTO "conta_poupanca" (id_conta, taxa_rendimento_mensal) VALUES (10, 0.0050); -- id_conta = 10
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('CORRENTE', '5005-5', '0001', 980.20, 5);
+INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('POUPANCA', '5005-4', '0001', 5400.00, 5);

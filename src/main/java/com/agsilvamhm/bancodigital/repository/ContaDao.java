@@ -1,4 +1,4 @@
-package com.agsilvamhm.bancodigital.Repository;
+package com.agsilvamhm.bancodigital.repository;
 
 import com.agsilvamhm.bancodigital.model.*;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
@@ -33,18 +33,10 @@ public class ContaDao {
 
     private static final String BASE_SELECT_SQL = """
             SELECT
-                c.id as conta_id, c.numero, c.agencia, c.saldo,
-                cl.id as cliente_id, cl.cpf, cl.nome, cl.categoria as cliente_categoria,
-                cc.taxa_manutencao_mensal,
-                cp.taxa_rendimento_mensal,
-                CASE
-                    WHEN cc.id_conta IS NOT NULL THEN 'CORRENTE'
-                    WHEN cp.id_conta IS NOT NULL THEN 'POUPANCA'
-                END as tipo_conta
+                c.id as conta_id, c.numero, c.agencia, c.saldo, c.tipo_conta,
+                cl.id as cliente_id, cl.cpf, cl.nome, cl.categoria as cliente_categoria
             FROM conta c
             JOIN cliente cl ON c.id_cliente = cl.id
-            LEFT JOIN conta_corrente cc ON c.id = cc.id_conta
-            LEFT JOIN conta_poupanca cp ON c.id = cp.id_conta
             """;
 
     private final RowMapper<Conta> contaRowMapper = (rs, rowNum) -> {
@@ -52,15 +44,11 @@ public class ContaDao {
         Conta conta;
 
         if ("CORRENTE".equals(tipoConta)) {
-            ContaCorrente cc = new ContaCorrente();
-            cc.setTaxaManutencaoMensal(rs.getDouble("taxa_manutencao_mensal"));
-            conta = cc;
+            conta = new ContaCorrente();
         } else if ("POUPANCA".equals(tipoConta)) {
-            ContaPoupanca cp = new ContaPoupanca();
-            cp.setTaxaRendimentoMensal(rs.getDouble("taxa_rendimento_mensal"));
-            conta = cp;
+            conta = new ContaPoupanca();
         } else {
-            conta = new Conta() {};
+            throw new IllegalStateException("Tipo de conta desconhecido no banco de dados: " + tipoConta);
         }
 
         conta.setId(rs.getLong("conta_id"));
@@ -84,33 +72,32 @@ public class ContaDao {
         Objects.requireNonNull(conta.getCliente(), "O cliente da conta não pode ser nulo.");
         Objects.requireNonNull(conta.getCliente().getId(), "O ID do cliente não pode ser nulo.");
 
-        String sqlConta = "INSERT INTO conta (numero, agencia, saldo, id_cliente) VALUES (?, ?, ?, ?)";
+        final String tipoConta;
+        if (conta instanceof ContaCorrente) {
+            tipoConta = "CORRENTE";
+        } else if (conta instanceof ContaPoupanca) {
+            tipoConta = "POUPANCA";
+        } else {
+            throw new IllegalArgumentException("Tipo de conta desconhecido ou não suportado para salvar.");
+        }
+
+        String sql = "INSERT INTO conta (tipo_conta, numero, agencia, saldo, id_cliente) VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sqlConta, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, conta.getNumero());
-            ps.setString(2, conta.getAgencia());
-            ps.setBigDecimal(3, conta.getSaldo());
-            ps.setInt(4, conta.getCliente().getId());
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, tipoConta);
+            ps.setString(2, conta.getNumero());
+            ps.setString(3, conta.getAgencia());
+            ps.setBigDecimal(4, conta.getSaldo());
+            ps.setInt(5, conta.getCliente().getId());
             return ps;
         }, keyHolder);
 
         long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         conta.setId(generatedId);
 
-        if (conta instanceof ContaCorrente) {
-            String sqlCC = "INSERT INTO conta_corrente (id_conta, taxa_manutencao_mensal) VALUES (?, ?)";
-            jdbcTemplate.update(sqlCC, generatedId, ((ContaCorrente) conta).getTaxaManutencaoMensal());
-            logger.info("Conta Corrente salva com ID: {}", generatedId);
-        } else if (conta instanceof ContaPoupanca) {
-            String sqlCP = "INSERT INTO conta_poupanca (id_conta, taxa_rendimento_mensal) VALUES (?, ?)";
-            jdbcTemplate.update(sqlCP, generatedId, ((ContaPoupanca) conta).getTaxaRendimentoMensal());
-            logger.info("Conta Poupança salva com ID: {}", generatedId);
-        } else {
-            throw new IllegalArgumentException("Tipo de conta desconhecido ou não suportado para salvar.");
-        }
-
+        logger.info("Conta do tipo {} salva com ID: {}", tipoConta, generatedId);
         return conta;
     }
 
@@ -137,12 +124,12 @@ public class ContaDao {
     }
 
     public List<Conta> listarContasCorrente() {
-        String sql = BASE_SELECT_SQL.replace("LEFT JOIN conta_corrente", "INNER JOIN conta_corrente");
+        String sql = BASE_SELECT_SQL + " WHERE c.tipo_conta = 'CORRENTE'";
         return jdbcTemplate.query(sql, contaRowMapper);
     }
 
-    public List<Conta> listarContasPoupanca() {
-        String sql = BASE_SELECT_SQL.replace("LEFT JOIN conta_poupanca", "INNER JOIN conta_poupanca");
+     public List<Conta> listarContasPoupanca() {
+        String sql = BASE_SELECT_SQL + " WHERE c.tipo_conta = 'POUPANCA'";
         return jdbcTemplate.query(sql, contaRowMapper);
     }
 
@@ -158,21 +145,13 @@ public class ContaDao {
             throw new RepositorioException("Conta com ID " + conta.getId() + " não encontrada para atualização.");
         }
 
-        if (conta instanceof ContaCorrente) {
-            String sqlCC = "UPDATE conta_corrente SET taxa_manutencao_mensal = ? WHERE id_conta = ?";
-            jdbcTemplate.update(sqlCC, ((ContaCorrente) conta).getTaxaManutencaoMensal(), conta.getId());
-        } else if (conta instanceof ContaPoupanca) {
-            String sqlCP = "UPDATE conta_poupanca SET taxa_rendimento_mensal = ? WHERE id_conta = ?";
-            jdbcTemplate.update(sqlCP, ((ContaPoupanca) conta).getTaxaRendimentoMensal(), conta.getId());
-        }
-
         logger.info("Conta ID {} atualizada com sucesso.", conta.getId());
     }
 
     public List<Conta> buscarPorClienteId(Integer clienteId) {
         String sql = BASE_SELECT_SQL + " WHERE c.id_cliente = ?";
         try {
-           return jdbcTemplate.query(sql, contaRowMapper, clienteId);
+            return jdbcTemplate.query(sql, contaRowMapper, clienteId);
         } catch (DataAccessException ex) {
             logger.error("Erro ao buscar contas para o cliente ID: {}", clienteId, ex);
             throw new RepositorioException("Erro ao buscar contas do cliente.", ex);

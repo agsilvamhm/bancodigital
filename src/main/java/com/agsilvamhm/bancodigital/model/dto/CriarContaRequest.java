@@ -6,7 +6,6 @@ public record CriarContaRequest(
         Integer clienteId,
         String numero,
         String agencia,
-        TipoConta tipoConta,
-        Double taxaManutencao,
-        Double taxaRendimento
+        TipoConta tipoConta
+
 ) {}

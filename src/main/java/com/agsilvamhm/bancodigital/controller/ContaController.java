@@ -85,7 +85,7 @@ public class ContaController {
     }
 
     @PostMapping("/{id}/pix")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or @authService.podeAcessarConta(#id)")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Movimentacao> realizarPix(
             @PathVariable Long id,
             @Valid @RequestBody PixRequestDTO request) {
@@ -95,7 +95,7 @@ public class ContaController {
     }
 
     @GetMapping("/{id}/movimentacoes")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or @authService.podeAcessarConta(#id)")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<List<Movimentacao>> listarMovimentacoes(@PathVariable Long id) {
         List<Movimentacao> extrato = contaService.listarMovimentacoesPorConta(id);
         return ResponseEntity.ok(extrato);

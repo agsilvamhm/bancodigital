@@ -1,7 +1,7 @@
 package com.agsilvamhm.bancodigital.service;
 
-import com.agsilvamhm.bancodigital.Repository.CartaoDao;
-import com.agsilvamhm.bancodigital.Repository.SeguroCartaoDao;
+import com.agsilvamhm.bancodigital.repository.CartaoDao;
+import com.agsilvamhm.bancodigital.repository.SeguroCartaoDao;
 import com.agsilvamhm.bancodigital.controller.exception.EntidadeNaoEncontradaException;
 import com.agsilvamhm.bancodigital.controller.exception.RegraNegocioException;
 import com.agsilvamhm.bancodigital.model.Cartao;
