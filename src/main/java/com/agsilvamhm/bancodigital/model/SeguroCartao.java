@@ -13,8 +13,6 @@ public class SeguroCartao {
     private String condicoes;
     private BigDecimal valorPremio;
 
-    // Construtor, Getters e Setters
-
     public SeguroCartao() {
     }
 

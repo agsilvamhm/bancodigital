@@ -7,8 +7,9 @@ public class Movimentacao {
     private TipoMovimentacao tipo;
     private double valor;
     private LocalDateTime dataHora;
-    private Conta contaOrigem; // Pode ser nulo para depósitos
+    private Conta contaOrigem; // Pode ser nulo para depósitos, ou para compras de crédito (onde a conta é afetada na fatura, não diretamente no saldo)
     private Conta contaDestino; // Pode ser nulo para saques
+    private Cartao cartao; // NOVO CAMPO: Referência ao objeto Cartao que gerou a movimentação
     private String descricao;
 
     public Integer getId() {
@@ -57,6 +58,14 @@ public class Movimentacao {
 
     public void setContaDestino(Conta contaDestino) {
         this.contaDestino = contaDestino;
+    }
+
+    public Cartao getCartao() { // NOVO GETTER
+        return cartao;
+    }
+
+    public void setCartao(Cartao cartao) { // NOVO SETTER
+        this.cartao = cartao;
     }
 
     public String getDescricao() {

@@ -1,3 +1,13 @@
+-- Limpa as tabelas existentes na ordem inversa de dependência para evitar erros de chave estrangeira
+DROP TABLE IF EXISTS "seguro_cartao";
+DROP TABLE IF EXISTS "movimentacao"; -- Movimentacao agora vem antes de Cartao no DROP
+DROP TABLE IF EXISTS "cartao";
+DROP TABLE IF EXISTS "conta";
+DROP TABLE IF EXISTS "cliente";
+DROP TABLE IF EXISTS "endereco";
+
+---
+-- 1. Tabela de Endereços (Não depende de nada)
 CREATE TABLE "endereco" (
   "id" INT AUTO_INCREMENT PRIMARY KEY,
   "rua" VARCHAR(255) NOT NULL,
@@ -8,14 +18,15 @@ CREATE TABLE "endereco" (
   "cep" VARCHAR(9) NOT NULL
 );
 
+---
+-- 2. Tabela de Clientes (Depende de endereco)
 CREATE TABLE "cliente" (
   "id" INT AUTO_INCREMENT PRIMARY KEY,
   "cpf" VARCHAR(14) UNIQUE NOT NULL,
   "nome" VARCHAR(255) NOT NULL,
   "data_nascimento" DATE NOT NULL,
   "categoria" VARCHAR(20) NOT NULL,
-  "id_endereco" INT UNIQUE NOT NULL,
-  -- Adicionando a restrição CHECK para simular o ENUM
+  "id_endereco" INT NOT NULL,
   CONSTRAINT "check_cliente_categoria" CHECK ("categoria" IN ('COMUM', 'SUPER', 'PREMIUM')),
   CONSTRAINT "fk_cliente_endereco"
     FOREIGN KEY("id_endereco")
@@ -23,6 +34,8 @@ CREATE TABLE "cliente" (
     ON DELETE RESTRICT
 );
 
+---
+-- 3. Tabela de Contas (Depende de cliente)
 CREATE TABLE "conta" (
   "id" INT AUTO_INCREMENT PRIMARY KEY,
   "tipo_conta" VARCHAR(10) NOT NULL CHECK ("tipo_conta" IN ('CORRENTE', 'POUPANCA')),
@@ -36,32 +49,20 @@ CREATE TABLE "conta" (
     ON DELETE CASCADE
 );
 
-CREATE TABLE "movimentacao" (
-  "id" INT AUTO_INCREMENT PRIMARY KEY,
-  "tipo" VARCHAR(20) NOT NULL,
-  "valor" DECIMAL(15, 2) NOT NULL,
-  "data_hora" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "id_conta_origem" INT,  -- <-- CORRIGIDO: Removido o NOT NULL
-  "id_conta_destino" INT,
-  "descricao" VARCHAR(255),
-  CONSTRAINT "check_movimentacao_tipo" CHECK ("tipo" IN ('DEPOSITO', 'SAQUE', 'TRANSFERENCIA', 'PIX')),
-  CONSTRAINT "fk_movimentacao_conta_origem" FOREIGN KEY("id_conta_origem") REFERENCES "conta"("id"),
-  CONSTRAINT "fk_movimentacao_conta_destino" FOREIGN KEY("id_conta_destino") REFERENCES "conta"("id")
-);
-
+---
+-- 4. Tabela de Cartões (Depende de conta) - NOVA POSIÇÃO
 CREATE TABLE "cartao" (
   "id" INT AUTO_INCREMENT PRIMARY KEY,
   "numero" VARCHAR(19) UNIQUE NOT NULL,
   "nome_titular" VARCHAR(255) NOT NULL,
   "data_validade" DATE NOT NULL,
   "cvv" VARCHAR(4) NOT NULL,
-  "senha" VARCHAR(255) NOT NULL, -- Lembre-se de armazenar a senha de forma segura (hash).
+  "senha" VARCHAR(255) NOT NULL,
   "tipo_cartao" VARCHAR(10) NOT NULL,
   "limite_credito" DECIMAL(10, 2),
   "limite_diario_debito" DECIMAL(10, 2),
   "ativo" BOOLEAN NOT NULL DEFAULT true,
   "id_conta" INT NOT NULL,
-  -- Adicionando a restrição CHECK para simular o ENUM
   CONSTRAINT "check_cartao_tipo" CHECK ("tipo_cartao" IN ('CREDITO', 'DEBITO')),
   CONSTRAINT "fk_cartao_conta"
     FOREIGN KEY("id_conta")
@@ -69,11 +70,30 @@ CREATE TABLE "cartao" (
     ON DELETE CASCADE
 );
 
+---
+-- 5. Tabela de Movimentações (Depende de conta E cartao) - NOVA POSIÇÃO
+CREATE TABLE "movimentacao" (
+  "id" INT AUTO_INCREMENT PRIMARY KEY,
+  "tipo" VARCHAR(20) NOT NULL,
+  "valor" DECIMAL(15, 2) NOT NULL,
+  "data_hora" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "id_conta_origem" INT NULL,
+  "id_conta_destino" INT NULL,
+  "id_cartao" INT NULL,
+  "descricao" VARCHAR(255),
+  CONSTRAINT "check_movimentacao_tipo" CHECK ("tipo" IN ('DEPOSITO', 'SAQUE', 'TRANSFERENCIA', 'PIX', 'TAXA_MANUTENCAO', 'RENDIMENTO', 'COMPRA_CREDITO', 'PAGAMENTO_FATURA')),
+  CONSTRAINT "fk_movimentacao_conta_origem" FOREIGN KEY("id_conta_origem") REFERENCES "conta"("id"),
+  CONSTRAINT "fk_movimentacao_conta_destino" FOREIGN KEY("id_conta_destino") REFERENCES "conta"("id"),
+  CONSTRAINT "fk_movimentacao_cartao" FOREIGN KEY("id_cartao") REFERENCES "cartao"("id")
+);
+
+---
+-- 6. Tabela de Seguro de Cartão (Depende de cartao)
 CREATE TABLE "seguro_cartao" (
   "id" INT AUTO_INCREMENT PRIMARY KEY,
   "numero_apolice" VARCHAR(50) UNIQUE NOT NULL,
-  "data_contratacao" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "cobertura" CLOB NOT NULL, -- Usando CLOB para textos longos no H2 (equivalente ao TEXT)
+  "data_contratacao" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "cobertura" CLOB NOT NULL,
   "condicoes" CLOB,
   "valor_premio" DECIMAL(10, 2) NOT NULL,
   "id_cartao" INT UNIQUE NOT NULL,
@@ -83,12 +103,9 @@ CREATE TABLE "seguro_cartao" (
     ON DELETE CASCADE
 );
 
-ALTER TABLE "movimentacao" DROP CONSTRAINT "check_movimentacao_tipo";
-
-ALTER TABLE "movimentacao" ADD CONSTRAINT "check_movimentacao_tipo"
-CHECK ("tipo" IN ('DEPOSITO', 'SAQUE', 'TRANSFERENCIA', 'PIX', 'TAXA_MANUTENCAO', 'RENDIMENTO'));
-
--- Povoar tabelas para os testes  --
+---
+-- Povoar tabelas para os testes --
+-- O INSERT INTO funciona na mesma ordem de criação das tabelas
 
 INSERT INTO "endereco" (rua, numero, complemento, cidade, estado, cep)
 VALUES ('Rua da Consolação', 1500, 'Bloco B, Apto 54', 'São Paulo', 'SP', '01301-100');

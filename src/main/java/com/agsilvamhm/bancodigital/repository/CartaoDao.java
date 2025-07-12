@@ -1,8 +1,6 @@
 package com.agsilvamhm.bancodigital.repository;
 
-import com.agsilvamhm.bancodigital.model.Cartao;
-import com.agsilvamhm.bancodigital.model.Conta;
-import com.agsilvamhm.bancodigital.model.TipoCartao;
+import com.agsilvamhm.bancodigital.model.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,17 +29,20 @@ public class CartaoDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Query base para reutilização, unindo as tabelas necessárias.
+    // ATENÇÃO: Adicione 'co.tipo_conta' à sua SELECT para que o mapeamento funcione!
     private static final String BASE_SELECT_SQL = """
             SELECT
                 ca.id as cartao_id, ca.numero as cartao_numero, ca.nome_titular, ca.data_validade, ca.cvv,
                 ca.senha, ca.tipo_cartao, ca.limite_credito, ca.limite_diario_debito, ca.ativo,
-                co.id as conta_id, co.numero as conta_numero, co.agencia
+                co.id as conta_id, co.numero as conta_numero, co.agencia, co.saldo as conta_saldo,
+                co.tipo_conta, -- NOVO: COLUNA DO TIPO DE CONTA
+                cl.id as cliente_id, cl.cpf as cliente_cpf, cl.nome as cliente_nome,
+                cl.data_nascimento as cliente_data_nascimento, cl.categoria as cliente_categoria
             FROM cartao ca
             JOIN conta co ON ca.id_conta = co.id
+            JOIN cliente cl ON co.id_cliente = cl.id
             """;
 
-    // RowMapper para converter o resultado da query em um objeto Cartao.
     private final RowMapper<Cartao> cartaoRowMapper = (rs, rowNum) -> {
         Cartao cartao = new Cartao();
         cartao.setId(rs.getInt("cartao_id"));
@@ -55,11 +56,31 @@ public class CartaoDao {
         cartao.setLimiteDiarioDebito(rs.getBigDecimal("limite_diario_debito"));
         cartao.setAtivo(rs.getBoolean("ativo"));
 
-        // Mapeia o objeto Conta aninhado
-        Conta conta = new Conta() {}; // Usando classe anônima para instanciar a classe abstrata
+        // Mapeia o objeto Cliente
+        Cliente cliente = new Cliente();
+        cliente.setId(rs.getInt("cliente_id"));
+        cliente.setCpf(rs.getString("cliente_cpf"));
+        cliente.setNome(rs.getString("cliente_nome"));
+        cliente.setDataNascimento(rs.getDate("cliente_data_nascimento").toLocalDate());
+        cliente.setCategoria(CategoriaCliente.valueOf(rs.getString("cliente_categoria")));
+
+        // Mapeia o objeto Conta
+        String tipoContaStr = rs.getString("tipo_conta"); // Obtém o tipo de conta da coluna SQL
+        Conta conta;
+        if (TipoConta.CORRENTE.name().equals(tipoContaStr)) {
+            conta = new ContaCorrente(); // Instancia ContaCorrente
+        } else if (TipoConta.POUPANCA.name().equals(tipoContaStr)) {
+            conta = new ContaPoupanca(); // Instancia ContaPoupanca
+        } else {
+            // Lançar exceção ou logar erro se o tipo de conta for desconhecido
+            throw new IllegalArgumentException("Tipo de conta desconhecido: " + tipoContaStr);
+        }
+
         conta.setId(rs.getLong("conta_id"));
         conta.setNumero(rs.getString("conta_numero"));
         conta.setAgencia(rs.getString("agencia"));
+        conta.setSaldo(rs.getBigDecimal("conta_saldo"));
+        conta.setCliente(cliente);
         cartao.setConta(conta);
 
         return cartao;
@@ -84,7 +105,7 @@ public class CartaoDao {
             ps.setString(2, cartao.getNomeTitular());
             ps.setDate(3, java.sql.Date.valueOf(cartao.getDataValidade()));
             ps.setString(4, cartao.getCvv());
-            ps.setString(5, cartao.getSenha()); // Lembre-se de usar um hash
+            ps.setString(5, cartao.getSenha()); // Lembre-se de usar um hash em um sistema real
             ps.setString(6, cartao.getTipoCartao().name());
             ps.setBigDecimal(7, cartao.getLimiteCredito());
             ps.setBigDecimal(8, cartao.getLimiteDiarioDebito());

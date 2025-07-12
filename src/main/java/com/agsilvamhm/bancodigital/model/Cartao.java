@@ -17,8 +17,6 @@ public class Cartao {
     private BigDecimal limiteDiarioDebito; // Aplicável apenas para cartões de débito
     private boolean ativo;
 
-    // Construtor, Getters e Setters
-
     public Cartao() {
     }
 

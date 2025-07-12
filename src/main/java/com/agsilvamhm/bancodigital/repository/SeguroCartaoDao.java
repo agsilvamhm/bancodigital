@@ -31,7 +31,6 @@ public class SeguroCartaoDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Query base para reutilização
     private static final String BASE_SELECT_SQL = """
             SELECT
                 s.id as seguro_id, s.numero_apolice, s.data_contratacao, s.cobertura,
@@ -41,7 +40,6 @@ public class SeguroCartaoDao {
             JOIN cartao c ON s.id_cartao = c.id
             """;
 
-    // RowMapper para converter o resultado da query em um objeto SeguroCartao.
     private final RowMapper<SeguroCartao> seguroCartaoRowMapper = (rs, rowNum) -> {
         SeguroCartao seguro = new SeguroCartao();
         seguro.setId(rs.getInt("seguro_id"));
