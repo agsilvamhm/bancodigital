@@ -2,7 +2,9 @@
 
 # 🏦 API para Banco Digital
 
-Este projeto consiste no desenvolvimento de uma API RESTful robusta para um sistema de Banco Digital. A aplicação simula as operações essenciais de uma instituição financeira, permitindo o gerenciamento completo de clientes, contas, cartões e seguros, com regras de negócio bem definidas para cada funcionalidade.
+Este projeto consiste no desenvolvimento de uma API RESTful robusta para um sistema de Banco Digital.
+A aplicação simula as operações essenciais de uma instituição financeira, permitindo o gerenciamento 
+completo de clientes, contas, cartões e seguros, com regras de negócio bem definidas para cada funcionalidade.
 
 ## ✨ Principais Funcionalidades
 
@@ -12,7 +14,7 @@ O sistema foi projetado para cobrir as seguintes áreas:
 
     * Cadastro, consulta, atualização e exclusão de clientes (CRUD).
     * Classificação de clientes em três categorias: **Comum**, **Super** e **Premium**, que define o acesso a diferentes benefícios e taxas.
-    * Validação rigorosa de dados na entrada, como formato e unicidade do CPF, idade e formato de endereço.
+    * Validação rigorosa de dados na entrada, como formato e unicidade do CPF, idade: o cliente dever ser maior ou igual a 18 anos e obedecer o formato "DD/MM/AAAA", o cep deve obedecer o formato "XXXXX-XXX".
 
 * **👤 Contas Bancárias:**
 
@@ -155,11 +157,9 @@ classDiagram
   }
 
   class ContaCorrente {
-    -double taxaManutencaoMensal
-  }
+   }
 
   class ContaPoupanca {
-    -double taxaRendimentoMensal
   }
 
   class Movimentacao {
