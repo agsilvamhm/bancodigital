@@ -65,12 +65,7 @@ public class CartaoService {
         novoCartao.setSenha(request.senha()); // Lembre-se de hashear a senha no mundo real
 
         if (TipoCartao.CREDITO.equals(request.tipoCartao())) {
-            // Define o limite de crédito com base na CategoriaCliente (preferencial)
             novoCartao.setLimiteCredito(categoriaCliente.getLimiteCreditoPadrao());
-            // Opcional: Se a request permitir um limite, você pode adicionar lógica para validar/aplicar
-            // if (request.limiteCredito() != null && request.limiteCredito().compareTo(BigDecimal.ZERO) > 0) {
-            //    novoCartao.setLimiteCredito(request.limiteCredito());
-            // }
             logger.info("Cartão de crédito para categoria {} com limite de R$ {}.", categoriaCliente.getDescricao(), novoCartao.getLimiteCredito());
         } else {
             novoCartao.setLimiteDiarioDebito(request.limiteDiarioDebito());
@@ -98,27 +93,17 @@ public class CartaoService {
             throw new RegraNegocioException("O cartão está inativo.");
         }
 
-        // **IMPORTANTE**: No sistema real, a senha armazenada seria um hash e você compararia o hash
-        // exemplo: if (!passwordEncoder.matches(request.senha(), cartao.getSenha())) { ... }
         if (!cartao.getSenha().equals(request.senha())) { // Placeholder para demonstração
             throw new RegraNegocioException("Senha do cartão incorreta.");
         }
 
         if (TipoCartao.CREDITO.equals(cartao.getTipoCartao())) {
-            // Lógica para pagamento com crédito
-            // Para um cálculo de limite disponível real, você precisaria da fatura atual.
-            // Aqui, apenas validamos contra o limite total como simplificação.
             BigDecimal limiteDisponivelAtual = cartao.getLimiteCredito();
-            // Lógica para obter o saldo devedor da fatura e subtrair do limite
-            // Ex: BigDecimal saldoDevedorFatura = faturaService.getSaldoDevedorAtual(cartaoId);
-            //     limiteDisponivelAtual = limiteDisponivelAtual.subtract(saldoDevedorFatura);
-
 
             if (limiteDisponivelAtual.compareTo(request.valor()) < 0) {
                 throw new RegraNegocioException("Limite de crédito insuficiente.");
             }
 
-            // Registra a movimentação de crédito
             Movimentacao movimentacao = new Movimentacao();
             movimentacao.setTipo(TipoMovimentacao.COMPRA_CREDITO);
             movimentacao.setValor(request.valor().doubleValue());
@@ -130,7 +115,6 @@ public class CartaoService {
             logger.info("Pagamento de R$ {} no crédito para o cartão ID {} aprovado.", request.valor(), cartaoId);
 
         } else if (TipoCartao.DEBITO.equals(cartao.getTipoCartao())) {
-            // Lógica de pagamento com débito
             Conta conta = contaDao.buscarPorId(cartao.getConta().getId().longValue())
                     .orElseThrow(() -> new EntidadeNaoEncontradaException("Conta associada ao cartão não encontrada."));
 
@@ -163,8 +147,6 @@ public class CartaoService {
         logger.info("Status do cartão ID {} alterado para {}.", cartaoId, novoStatus ? "ATIVO" : "INATIVO");
     }
 
-    // --- Métodos Adicionais Implementados ---
-
     @Transactional
     public void atualizarLimiteCredito(Integer cartaoId, BigDecimal novoLimite) {
         Cartao cartao = buscarPorId(cartaoId);
@@ -182,8 +164,6 @@ public class CartaoService {
     @Transactional
     public void alterarSenha(Integer cartaoId, String novaSenha) {
         Cartao cartao = buscarPorId(cartaoId);
-        // **IMPORTANTE**: Aqui você deve hashear a nova senha antes de salvá-la
-        // String novaSenhaHasheada = passwordEncoder.encode(novaSenha);
         String novaSenhaHasheada = novaSenha; // Placeholder
         cartaoDao.atualizarSenha(cartaoId, novaSenhaHasheada);
         logger.info("Senha do cartão ID {} alterada com sucesso.", cartaoId);
@@ -204,12 +184,9 @@ public class CartaoService {
             throw new RegraNegocioException("Saldo insuficiente na conta para pagar a fatura.");
         }
 
-        // Lógica real de pagamento de fatura:
-        // 1. Diminuir o saldo da conta
         contaPagamento.setSaldo(contaPagamento.getSaldo().subtract(valorPagamento));
         contaDao.atualizar(contaPagamento);
 
-        // 2. Registrar movimentação de pagamento de fatura
         Movimentacao movimentacaoPagamento = new Movimentacao();
         movimentacaoPagamento.setTipo(TipoMovimentacao.PAGAMENTO_FATURA);
         movimentacaoPagamento.setValor(valorPagamento.doubleValue());
@@ -218,9 +195,6 @@ public class CartaoService {
         movimentacaoPagamento.setDescricao("Pagamento de fatura do cartão " + cartao.getNumero());
         movimentacaoPagamento.setDataHora(LocalDateTime.now());
         movimentacaoDao.salvar(movimentacaoPagamento);
-
-        // 3. Atualizar o saldo devedor da fatura (isso envolveria uma entidade Fatura e FaturaService)
-        // Por exemplo: faturaService.registrarPagamento(cartaoId, valorPagamento);
 
         logger.info("Pagamento de fatura de R$ {} para o cartão ID {} realizado com sucesso.", valorPagamento, cartaoId);
     }
@@ -238,8 +212,6 @@ public class CartaoService {
         logger.info("Limite diário de débito do cartão ID {} alterado para R$ {}.", cartaoId, novoLimite);
     }
 
-
-    // Método para gerar fatura (já estava na versão anterior)
     public FaturaDTO gerarFaturaMensal(Integer cartaoId, YearMonth mesReferencia) {
         Cartao cartao = buscarPorId(cartaoId);
 

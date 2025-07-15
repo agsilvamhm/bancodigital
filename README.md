@@ -292,3 +292,49 @@ graph TD
     Service -- Lança Exceção de Negócio --> Controller
     Controller -- Captura Exceções --> ErrorResponse
 ```
+
+```mermaid
+graph TD
+A[Início] --> B{Receber dados do Cliente};
+
+    B --> C{CPF é nulo ou vazio?};
+    C -- Sim --> E[Retornar Erro: CPF obrigatório];
+    [cite_start]C -- Não --> D{CPF é válido (formato e autenticidade)[cite: 86]?};
+    D -- Não --> F[Retornar Erro: CPF inválido];
+    [cite_start]D -- Sim --> G{CPF já existe (único)[cite: 85]?};
+    G -- Sim --> H[Retornar Erro: CPF já cadastrado];
+    G -- Não --> I{Nome é nulo ou vazio?};
+    I -- Sim --> J[Retornar Erro: Nome obrigatório];
+    [cite_start]I -- Não --> K{Nome tem entre 2 e 100 caracteres[cite: 89]?};
+    K -- Não --> L[Retornar Erro: Nome fora do tamanho permitido];
+    [cite_start]K -- Sim --> M{Nome contém apenas letras e espaços[cite: 88]?};
+    M -- Não --> N[Retornar Erro: Nome inválido];
+    M -- Sim --> O{Data de Nascimento é nula ou vazia?};
+    O -- Sim --> P[Retornar Erro: Data de nascimento obrigatória];
+    [cite_start]O -- Não --> Q{Data de Nascimento no formato DD/MM/AAAA[cite: 91]?};
+    Q -- Não --> R[Retornar Erro: Formato de Data de Nascimento inválido];
+    [cite_start]Q -- Sim --> S{Cliente tem 18 anos ou mais[cite: 92]?};
+    S -- Não --> T[Retornar Erro: Cliente menor de idade];
+    S -- Sim --> U{Endereço é nulo?};
+    U -- Sim --> V[Retornar Erro: Endereço obrigatório];
+    [cite_start]U -- Não --> W{Rua, Número, Cidade, Estado e CEP estão preenchidos[cite: 94]?};
+    W -- Não --> X[Retornar Erro: Endereço incompleto];
+    [cite_start]W -- Sim --> Y{CEP está no formato XXXXX-XXX[cite: 95]?};
+    Y -- Não --> Z[Retornar Erro: CEP inválido];
+    Y -- Sim --> AA[Dados do Cliente Válidos];
+
+    AA --> B_End[Fim];
+
+    E --> B_End;
+    F --> B_End;
+    H --> B_End;
+    J --> B_End;
+    L --> B_End;
+    N --> B_End;
+    P --> B_End;
+    R --> B_End;
+    T --> B_End;
+    V --> B_End;
+    X --> B_End;
+    Z --> B_End;
+```
