@@ -297,29 +297,29 @@ graph TD
 graph TD
     A[Inicio] --> B{Receber dados do Cliente};
 
-    B --> C{CPF eh nulo ou vazio?};
+    B --> C{CPF eh nulo ou vazio};
     C -- Sim --> E[Retornar Erro: CPF obrigatorio];
-    C -- Nao --> D{CPF eh valido?};
+    C -- Nao --> D{CPF eh valido};
     D -- Nao --> F[Retornar Erro: CPF invalido];
-    D -- Sim --> G{CPF ja existe (unico)?};
+    D -- Sim --> G{CPF ja existe};
     G -- Sim --> H[Retornar Erro: CPF ja cadastrado];
-    G -- Nao --> I{Nome eh nulo ou vazio?};
+    G -- Nao --> I{Nome eh nulo ou vazio};
     I -- Sim --> J[Retornar Erro: Nome obrigatorio];
-    I -- Nao --> K{Nome tem entre 2 e 100 caracteres?};
+    I -- Nao --> K{Nome tem entre 2 e 100 caracteres};
     K -- Nao --> L[Retornar Erro: Nome fora do tamanho permitido];
-    K -- Sim --> M{Nome contem apenas letras e espacos?};
+    K -- Sim --> M{Nome contem apenas letras e espacos};
     M -- Nao --> N[Retornar Erro: Nome invalido];
-    M -- Sim --> O{Data de Nascimento eh nula ou vazia?};
+    M -- Sim --> O{Data de Nascimento eh nula ou vazia};
     O -- Sim --> P[Retornar Erro: Data de nascimento obrigatoria];
-    O -- Nao --> Q{Data de Nascimento no formato DD/MM/AAAA?};
+    O -- Nao --> Q{Data de Nascimento no formato DD/MM/AAAA};
     Q -- Nao --> R[Retornar Erro: Formato de Data de Nascimento invalido];
-    Q -- Sim --> S{Cliente tem 18 anos ou mais?};
+    Q -- Sim --> S{Cliente tem 18 anos ou mais};
     S -- Nao --> T[Retornar Erro: Cliente menor de idade];
-    S -- Sim --> U{Endereco eh nulo?};
+    S -- Sim --> U{Endereco eh nulo};
     U -- Sim --> V[Retornar Erro: Endereco obrigatorio];
-    U -- Nao --> W{Rua, Numero, Cidade, Estado e CEP estao preenchidos?};
+    U -- Nao --> W{Rua, Numero, Cidade, Estado e CEP estao preenchidos};
     W -- Nao --> X[Retornar Erro: Endereco incompleto];
-    W -- Sim --> Y{CEP esta no formato XXXXX-XXX?};
+    W -- Sim --> Y{CEP esta no formato XXXXX-XXX};
     Y -- Nao --> Z[Retornar Erro: CEP invalido];
     Y -- Sim --> AA[Dados do Cliente Validos];
 
