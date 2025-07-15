@@ -299,7 +299,7 @@ graph TD
 
     B --> C{CPF eh nulo ou vazio?};
     C -- Sim --> E[Retornar Erro: CPF obrigatorio];
-    C -- Nao --> D{CPF eh valido (formato e autenticidade)?};
+    C -- Nao --> D{CPF eh valido?};
     D -- Nao --> F[Retornar Erro: CPF invalido];
     D -- Sim --> G{CPF ja existe (unico)?};
     G -- Sim --> H[Retornar Erro: CPF ja cadastrado];
