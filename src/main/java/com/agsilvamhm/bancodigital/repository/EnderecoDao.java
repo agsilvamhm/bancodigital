@@ -25,6 +25,7 @@ public class EnderecoDao {
 
     private static final String INSERT_ENDERECO = "INSERT INTO endereco (rua, numero, complemento, cidade, estado, cep) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String SELECT_BY_ID = "SELECT * FROM endereco WHERE id = ?";
+    private static final String SELECT_BY_CEP = "SELECT * FROM endereco WHERE cep = ?"; // Novo
     private static final String UPDATE_ENDERECO = "UPDATE endereco SET rua = ?, numero = ?, complemento = ?, cidade = ?, estado = ?, cep = ? WHERE id = ?";
     private static final String DELETE_BY_ID = "DELETE FROM endereco WHERE id = ?";
 
@@ -70,6 +71,20 @@ public class EnderecoDao {
         } catch (DataAccessException ex) {
             logger.error("Erro de acesso a dados ao buscar endereço pelo ID: {}", id, ex);
             throw new RepositorioException("Erro ao buscar endereço por ID.", ex);
+        }
+    }
+
+    // Novo método para buscar endereço por CEP
+    public Optional<Endereco> buscarPorCep(String cep) {
+        try {
+            Endereco endereco = jdbcTemplate.queryForObject(SELECT_BY_CEP, new BeanPropertyRowMapper<>(Endereco.class), cep);
+            return Optional.ofNullable(endereco);
+        } catch (EmptyResultDataAccessException ex) {
+            logger.warn("Nenhum endereço encontrado com o CEP: {}", cep);
+            return Optional.empty();
+        } catch (DataAccessException ex) {
+            logger.error("Erro de acesso a dados ao buscar endereço pelo CEP: {}", cep, ex);
+            throw new RepositorioException("Erro ao buscar endereço por CEP.", ex);
         }
     }
 

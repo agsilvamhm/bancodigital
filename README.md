@@ -92,9 +92,6 @@ A API é RESTful e foi estruturada em torno dos principais recursos do sistema. 
 ## 🚀 Funcionalidades Adicionais
 
 * **🔒 Autenticação e Autorização:** Implementação de `Spring Security` com `JWT` para proteger os endpoints e definir níveis de acesso (`ROLE_ADMIN`, `ROLE_CLIENTE`).
-* **🌐 Integração com APIs Externas:**
-    * **Validação de CPF:** Consumo de uma API da Receita Federal para validar a situação cadastral do cliente.
-    * **Cotação de Moedas:** Integração com APIs de câmbio para futuras funcionalidades de conversão monetária.
 
 ## Tecnologias utilizadas
 - **Java 17**: Utilizei a versão LTS (Long Term Support) do Java para aproveitar as inovações e a robustez que essa linguagem oferece, garantindo performance e escalabilidade.

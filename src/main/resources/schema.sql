@@ -152,3 +152,85 @@ INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('PO
 -- Cliente 5 (ID: 5)
 INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('CORRENTE', '5005-5', '0001', 980.20, 5);
 INSERT INTO "conta" (tipo_conta, numero, agencia, saldo, id_cliente) VALUES ('POUPANCA', '5005-4', '0001', 5400.00, 5);
+
+-- Povoar a tabela Cartão
+
+-- Cartão de Crédito para Cliente 1 (Conta CORRENTE - ID: 1)
+INSERT INTO "cartao" (numero, nome_titular, data_validade, cvv, senha, tipo_cartao, limite_credito, limite_diario_debito, ativo, id_conta)
+VALUES ('4000-1234-5678-9010', 'RICARDO S. COSTA', '2028-12-31', '123', 'senha123', 'CREDITO', 5000.00, NULL, true, 1);
+
+-- Cartão de Débito para Cliente 1 (Conta POUPANCA - ID: 2)
+INSERT INTO "cartao" (numero, nome_titular, data_validade, cvv, senha, tipo_cartao, limite_credito, limite_diario_debito, ativo, id_conta)
+VALUES ('5000-1122-3344-5566', 'RICARDO S. COSTA', '2027-11-30', '456', 'senha456', 'DEBITO', NULL, 1000.00, true, 2);
+
+-- Cartão de Crédito para Cliente 2 (Conta CORRENTE - ID: 3)
+INSERT INTO "cartao" (numero, nome_titular, data_validade, cvv, senha, tipo_cartao, limite_credito, limite_diario_debito, ativo, id_conta)
+VALUES ('4000-9876-5432-1098', 'ANA P. LIMA', '2029-01-31', '789', 'senha789', 'CREDITO', 3000.00, NULL, true, 3);
+
+-- Cartão de Débito para Cliente 3 (Conta CORRENTE - ID: 5)
+INSERT INTO "cartao" (numero, nome_titular, data_validade, cvv, senha, tipo_cartao, limite_credito, limite_diario_debito, ativo, id_conta)
+VALUES ('5000-9988-7766-5544', 'BRUNO F. ALVES', '2026-06-30', '101', 'senha101', 'DEBITO', NULL, 800.00, true, 5);
+
+-- Cartão de Crédito para Cliente 4 (Conta CORRENTE - ID: 7)
+INSERT INTO "cartao" (numero, nome_titular, data_validade, cvv, senha, tipo_cartao, limite_credito, limite_diario_debito, ativo, id_conta)
+VALUES ('4000-1111-2222-3333', 'CARLA D. MARTINS', '2030-03-31', '202', 'senha202', 'CREDITO', 10000.00, NULL, true, 7);
+
+---
+
+-- Povoar a tabela Movimentação
+
+-- Movimentações para Cliente 1 (Ricardo Souza Costa)
+-- ID da Conta Corrente: 1, ID da Conta Poupança: 2
+-- ID do Cartão de Crédito: 1, ID do Cartão de Débito: 2
+
+-- Depósito na Conta Corrente
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_destino, descricao)
+VALUES ('DEPOSITO', 200.00, CURRENT_TIMESTAMP, 1, 'Depósito em dinheiro');
+
+-- Compra com Cartão de Crédito (Cartão ID 1)
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_origem, id_cartao, descricao)
+VALUES ('COMPRA_CREDITO', 75.50, CURRENT_TIMESTAMP, 1, 1, 'Compra em supermercado');
+
+-- Saque na Conta Corrente
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_origem, descricao)
+VALUES ('SAQUE', 100.00, CURRENT_TIMESTAMP, 1, 'Saque em caixa eletrônico');
+
+-- Pix da Conta Corrente para a Conta Poupança
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_origem, id_conta_destino, descricao)
+VALUES ('PIX', 300.00, CURRENT_TIMESTAMP, 1, 2, 'Transferência PIX para poupança');
+
+-- Rendimento na Conta Poupança
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_destino, descricao)
+VALUES ('RENDIMENTO', 15.20, CURRENT_TIMESTAMP, 2, 'Rendimento mensal da poupança');
+
+-- Pagamento de Fatura do Cartão de Crédito (Cartão ID 1)
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_origem, id_cartao, descricao)
+VALUES ('PAGAMENTO_FATURA', 75.50, CURRENT_TIMESTAMP, 1, 1, 'Pagamento fatura cartão de crédito');
+
+-- Movimentações para Cliente 2 (Ana Pereira Lima)
+-- ID da Conta Corrente: 3, ID da Conta Poupança: 4
+-- ID do Cartão de Crédito: 3
+
+-- Compra com Cartão de Crédito (Cartão ID 3)
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_origem, id_cartao, descricao)
+VALUES ('COMPRA_CREDITO', 120.00, CURRENT_TIMESTAMP, 3, 3, 'Compra online de roupas');
+
+-- Transferência da Conta Corrente para outra conta (Não especificada)
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_origem, descricao)
+VALUES ('TRANSFERENCIA', 50.00, CURRENT_TIMESTAMP, 3, 'Transferência para amigo');
+
+-- Movimentações para Cliente 3 (Bruno Ferreira Alves)
+-- ID da Conta Corrente: 5, ID da Conta Poupança: 6
+-- ID do Cartão de Débito: 4
+
+-- Compra com Cartão de Débito (Cartão ID 4)
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_origem, id_cartao, descricao)
+VALUES ('SAQUE', 35.00, CURRENT_TIMESTAMP, 5, 4, 'Compra em padaria com cartão de débito');
+
+-- Movimentações para Cliente 4 (Carla Dias Martins)
+-- ID da Conta Corrente: 7, ID da Conta Poupança: 8
+-- ID do Cartão de Crédito: 5
+
+-- Compra com Cartão de Crédito (Cartão ID 5)
+INSERT INTO "movimentacao" (tipo, valor, data_hora, id_conta_origem, id_cartao, descricao)
+VALUES ('COMPRA_CREDITO', 500.00, CURRENT_TIMESTAMP, 7, 5, 'Parcelamento de eletrônicos');

@@ -6,15 +6,15 @@ import java.time.LocalDate;
 public class Cartao {
 
     private Integer id;
-    private Conta conta; // Referência ao objeto Conta
+    private Conta conta;
     private String numero;
     private String nomeTitular;
     private LocalDate dataValidade;
     private String cvv;
-    private String senha; // Em um sistema real, isso seria um hash
+    private String senha;
     private TipoCartao tipoCartao;
-    private BigDecimal limiteCredito; // Aplicável apenas para cartões de crédito
-    private BigDecimal limiteDiarioDebito; // Aplicável apenas para cartões de débito
+    private BigDecimal limiteCredito;
+    private BigDecimal limiteDiarioDebito;
     private boolean ativo;
 
     public Cartao() {
