@@ -1,14 +1,37 @@
 # Trilha de Aprendizado Java - EDUC360
 
-# 🏦 API para Banco Digital
+# API para Banco Digital
 
 Este projeto consiste no desenvolvimento de uma API RESTful robusta para um sistema de Banco Digital.
 A aplicação simula as operações essenciais de uma instituição financeira, permitindo o gerenciamento 
 completo de clientes, contas, cartões e seguros, com regras de negócio bem definidas para cada funcionalidade.
 
-## ✨ Principais Funcionalidades
+## Principais Funcionalidades
 
 O sistema foi projetado para cobrir as seguintes áreas:
+
+* **Autenticação:**
+* O sistema utilizará o controle de autenticação por token JWT, como também fará o registro dos acessos ao sistema para cada usuário.
+
+```mermaid
+classDiagram
+  direction LR
+
+  class User {
+  -UUID userId
+  -String username
+  -String password
+  -List~Role~ roles  
+  }
+  
+  class Role {
+  - Long roleId
+  - String name
+  }
+  
+  User "1" -- "1..N" Role : possui
+
+```
 
 * **👤 Gestão de Clientes:**
 
