@@ -83,6 +83,52 @@ classDiagram
   AuditEvent "1" -- "1" AuditEventType : possui
   Notification "1" -- "1" NotificationType : possui  
 ```
+## **Descrição Funcional do Sistema de Controle de Acessos e Usuários**
+
+Este sistema foi projetado para oferecer um controle de acesso e gerenciamento de usuários de forma segura, granular e totalmente rastreável. Ele permite administrar não apenas **quem** pode acessar a aplicação, mas precisamente **o que** cada usuário pode fazer dentro dela, garantindo uma trilha de auditoria completa de todas as atividades sensíveis.
+
+A funcionalidade é dividida em três pilares principais:
+
+### **1. Gestão de Identidade e Acesso (Quem é você e o que você pode fazer?)**
+
+O núcleo do sistema permite um controle de acesso flexível baseado em **Perfis (Roles)** e **Permissões (Permissions)**.
+
+* **`User` (Usuários):** Cada pessoa que acessa o sistema possui uma conta única. O sistema gerencia o estado de cada usuário, podendo defini-lo como `ATIVO`, `INATIVO`, `PENDENTE DE VERIFICAÇÃO` ou até mesmo `BANIDO`.
+* **`Role` (Perfis):** Em vez de atribuir permissões uma a uma, o sistema utiliza perfis de acesso, como `ADMINISTRADOR`, `GERENTE` ou `USUÁRIO PADRÃO`. Isso simplifica o gerenciamento de um grande número de usuários.
+* **`Permission` (Permissões):** Esta é a parte mais poderosa do controle. Cada ação crítica no sistema é uma permissão (ex: `CRIAR_RELATORIO`, `DELETAR_FATURA`, `VISUALIZAR_DASHBOARD_FINANCEIRO`). Você pode criar quantos perfis forem necessários, combinando diferentes permissões para atender exatamente às necessidades do seu negócio, sem precisar alterar o código.
+
+> **Na prática:** Você pode criar um perfil "Assistente Financeiro" que tem permissão apenas para `VISUALIZAR_FATURAS` e `GERAR_RELATORIOS`, mas não para `DELETAR_FATURAS`, garantindo máxima segurança e aderência às regras de negócio.
+
+### **2. Segurança e Auditoria (O que aconteceu, quando e por quem?)**
+
+Para garantir a máxima segurança e conformidade, nenhuma ação importante passa despercebida.
+
+* **`AuditEvent` (Rastreabilidade Completa):** O sistema registra uma trilha de auditoria detalhada de todos os eventos de segurança. Isso inclui:
+  * Tentativas de login (bem-sucedidas ou falhas).
+  * Encerramento de sessão (logout).
+  * Alterações de senha.
+  * Tentativas de acesso a recursos sem permissão.
+* **Análise de Segurança:** Cada evento é registrado com data, hora e o endereço de IP de origem, o que é crucial para identificar atividades suspeitas e investigar potenciais incidentes de segurança.
+
+> **Na prática:** Se um usuário relatar uma atividade estranha em sua conta, o administrador pode consultar o histórico para ver exatamente de onde e quando ocorreram os acessos, identificando rapidamente qualquer acesso não autorizado.
+
+### **3. Interação e Comunicação (Mantendo o usuário informado)**
+
+O sistema consegue se comunicar proativamente com os usuários através de um centro de notificações integrado.
+
+* **`Notification` (Notificações):** O sistema pode enviar mensagens direcionadas aos usuários sobre eventos importantes, como:
+  * Alertas do sistema.
+  * Mensagens diretas de outros usuários.
+  * Avisos sobre novas tarefas ou atribuições.
+* **Experiência do Usuário:** As notificações incluem o status de leitura, tipo e podem conter um link direto para a ação, melhorando a usabilidade e o engajamento do usuário com a plataforma.
+
+> **Na prática:** Quando uma nova tarefa é atribuída a um gerente, ele recebe imediatamente uma notificação no sistema com um link direto para a tarefa, agilizando o fluxo de trabalho.
+
+
+
+
+
+
 
 * **👤 Gestão de Clientes:**
 
