@@ -18,19 +18,32 @@ classDiagram
   direction LR
 
   class User {
-  -UUID userId
-  -String username
-  -String password
-  -List~Role~ roles  
+    -UUID userId
+    -String username
+    -String password
   }
   
   class Role {
-  - Long roleId
-  - String name
+    -Long roleId
+    -String name
   }
   
-  User "1" -- "1..N" Role : possui
-
+  class Historico_Acesso {
+    -UUID userId
+    -Date login
+    -Date logout    
+  }
+  
+  class Notificacao{
+   -UUID userId
+   -String message
+   -Boolean ativo
+  }
+  
+  User "*" -- "*" Role : possui
+  User "0" -- "*" Historico_Acesso : possui
+  User "0" -- "*" Notificacao : possui
+    
 ```
 
 * **👤 Gestão de Clientes:**
