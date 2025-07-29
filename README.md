@@ -21,28 +21,50 @@ classDiagram
     -UUID userId
     -String username
     -String password
+    -UserStatus status
   }
-  
+
   class Role {
     -Long roleId
     -String name
   }
-  
-  class Historico_Acesso {
+
+  class Permission {
+    -Long permissionId
+    -String name  // e.g., "CREATE_USER", "READ_REPORTS"
+  }
+
+  class AuditEvent {
+    -Long eventId
     -UUID userId
-    -Date login
-    -Date logout    
+    -Date timestamp
+    -String eventType
+    -String ipAddress
+    -Boolean success
   }
-  
-  class Notificacao{
-   -UUID userId
-   -String message
-   -Boolean ativo
+
+  class Notification {
+    -Long notificationId
+    -UUID userId
+    -String message
+    -Date createdAt
+    -Boolean isRead
+    -String type
+    -String link
   }
-  
-  User "*" -- "*" Role : possui
-  User "0" -- "*" Historico_Acesso : possui
-  User "0" -- "*" Notificacao : possui
+
+  enum UserStatus {
+    ACTIVE
+    INACTIVE
+    PENDING_VERIFICATION
+    BANNED
+  }
+
+  User "1" -- "0..*" Role : possui
+  Role "0..*" -- "1..*" Permission : contém  
+  User "1" -- "0..*" AuditEvent : gerou
+  User "1" -- "0..*" Notification : para
+  User "1" -- "1" UserStatus : tem
     
 ```
 
