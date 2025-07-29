@@ -53,7 +53,8 @@ classDiagram
     -String link
   }
 
-  enum UserStatus {
+  class UserStatus {
+    <<enumeration>>
     ACTIVE
     INACTIVE
     PENDING_VERIFICATION
