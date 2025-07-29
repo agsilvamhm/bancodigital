@@ -76,9 +76,12 @@ classDiagram
   }
 
   User "1" -- "0..*" Role : possui
+  User "1" -- "1" UserStatus: possui
   Role "*" -- "*" Permission : contém
   User "1" -- "0..*" AuditEvent : gerou
-  User "1" -- "0..*" Notification : destinatário    
+  User "1" -- "0..*" Notification : destinatário 
+  AuditEvent "1" -- "1" AuditEventType : possui
+  Notification "1" -- "1" NotificationType : possui  
 ```
 
 * **👤 Gestão de Clientes:**
