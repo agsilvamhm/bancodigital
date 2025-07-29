@@ -31,25 +31,23 @@ classDiagram
 
   class Permission {
     -Long permissionId
-    -String name  // e.g., "CREATE_USER", "READ_REPORTS"
+    -String name  // ex: "CREATE_USER", "READ_REPORTS"
   }
 
   class AuditEvent {
     -Long eventId
-    -UUID userId
     -Date timestamp
-    -String eventType
+    -AuditEventType type
     -String ipAddress
     -Boolean success
   }
 
   class Notification {
     -Long notificationId
-    -UUID userId
     -String message
     -Date createdAt
     -Boolean isRead
-    -String type
+    -NotificationType type
     -String link
   }
 
@@ -60,13 +58,27 @@ classDiagram
     PENDING_VERIFICATION
     BANNED
   }
+  
+  class AuditEventType {
+    <<enumeration>>
+    LOGIN_SUCCESS
+    LOGIN_FAILURE
+    LOGOUT
+    PASSWORD_UPDATE
+    RESOURCE_ACCESS_DENIED
+  }
+
+  class NotificationType {
+    <<enumeration>>
+    SYSTEM_ALERT
+    DIRECT_MESSAGE
+    TASK_ASSIGNMENT
+  }
 
   User "1" -- "0..*" Role : possui
-  Role "0..*" -- "1..*" Permission : contém  
+  Role "*" -- "*" Permission : contém
   User "1" -- "0..*" AuditEvent : gerou
-  User "1" -- "0..*" Notification : para
-  User "1" -- "1" UserStatus : tem
-    
+  User "1" -- "0..*" Notification : destinatário    
 ```
 
 * **👤 Gestão de Clientes:**
