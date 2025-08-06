@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 @Tag(name = "Usuários Controller", description = "RESTful API para controle de usuários.")
 public class TokenController {
-
+/*
     private final JwtEncoder jwtEncoder;
     private final UserRepository userRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -66,5 +66,5 @@ public class TokenController {
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
         return ResponseEntity.ok(new LoginResponse(jwtValue, expiresIn));
-    }
+    }*/
 }

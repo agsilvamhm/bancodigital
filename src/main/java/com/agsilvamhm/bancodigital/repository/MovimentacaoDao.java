@@ -2,7 +2,7 @@ package com.agsilvamhm.bancodigital.repository;
 
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
 import com.agsilvamhm.bancodigital.model.*;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class MovimentacaoDao {
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """;
 
-    @Transactional // Adicione @Transactional para o método salvar
+    //@Transactional // Adicione @Transactional para o método salvar
     public void salvar(Movimentacao movimentacao) {
         Objects.requireNonNull(movimentacao, "Objeto de movimentação não pode ser nulo.");
 

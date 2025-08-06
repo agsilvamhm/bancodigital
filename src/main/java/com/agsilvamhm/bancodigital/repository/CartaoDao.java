@@ -1,7 +1,7 @@
 package com.agsilvamhm.bancodigital.repository;
 
 import com.agsilvamhm.bancodigital.model.*;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +86,7 @@ public class CartaoDao {
         return cartao;
     };
 
-    @Transactional
+   // @Transactional
     public Cartao salvar(Cartao cartao) {
         Objects.requireNonNull(cartao, "O objeto cartao não pode ser nulo.");
         Objects.requireNonNull(cartao.getConta(), "A conta do cartão não pode ser nula.");
@@ -136,25 +136,25 @@ public class CartaoDao {
         return jdbcTemplate.query(sql, cartaoRowMapper, contaId);
     }
 
-    @Transactional
+   // @Transactional
     public int atualizarStatus(Integer id, boolean ativo) {
         String sql = "UPDATE cartao SET ativo = ? WHERE id = ?";
         return jdbcTemplate.update(sql, ativo, id);
     }
 
-    @Transactional
+  //  @Transactional
     public int atualizarSenha(Integer id, String novaSenhaHasheada) {
         String sql = "UPDATE cartao SET senha = ? WHERE id = ?";
         return jdbcTemplate.update(sql, novaSenhaHasheada, id);
     }
 
-    @Transactional
+  //  @Transactional
     public int atualizarLimiteCredito(Integer id, java.math.BigDecimal novoLimite) {
         String sql = "UPDATE cartao SET limite_credito = ? WHERE id = ?";
         return jdbcTemplate.update(sql, novoLimite, id);
     }
 
-    @Transactional
+  //  @Transactional
     public int atualizarLimiteDiarioDebito(Integer id, java.math.BigDecimal novoLimite) {
         String sql = "UPDATE cartao SET limite_diario_debito = ? WHERE id = ?";
         return jdbcTemplate.update(sql, novoLimite, id);

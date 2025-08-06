@@ -2,7 +2,7 @@ package com.agsilvamhm.bancodigital.repository;
 
 import com.agsilvamhm.bancodigital.model.*;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +66,7 @@ public class ContaDao {
         return conta;
     };
 
-    @Transactional
+   // @Transactional
     public Conta salvar(Conta conta) {
         Objects.requireNonNull(conta, "O objeto conta não pode ser nulo.");
         Objects.requireNonNull(conta.getCliente(), "O cliente da conta não pode ser nulo.");
@@ -133,7 +133,7 @@ public class ContaDao {
         return jdbcTemplate.query(sql, contaRowMapper);
     }
 
-    @Transactional
+  //  @Transactional
     public void atualizar(Conta conta) throws RepositorioException {
         Objects.requireNonNull(conta, "O objeto conta não pode ser nulo.");
         Objects.requireNonNull(conta.getId(), "O ID da conta não pode ser nulo para atualização.");

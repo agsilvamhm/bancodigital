@@ -33,7 +33,7 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Autowired
+    /*@Autowired
     private CustomAccessDeniedHandler customAccessDeniedHandler; // Injet
 
     @Value("${jwt.public.key}")
@@ -78,5 +78,5 @@ public class SecurityConfig {
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
-    }
+    } */
 }

@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -22,14 +22,14 @@ import java.util.List;
 @RequestMapping("/users")
 @Tag(name = "Usuários Controller", description = "RESTful API para controle de usuários.")
 public class UserController {
-
+/*
     private final UserService userService;
 
     public UserController(UserService userService){
         this.userService = userService;
     }
-
-    @Transactional
+/*
+   // @Transactional
     @PostMapping("/add")
     public ResponseEntity<UsuarioDto> newUser(@RequestBody CreateUserDto dto, JwtAuthenticationToken token) {
         var user = userService.create(dto, token);
@@ -52,5 +52,5 @@ public class UserController {
     public ResponseEntity<List<UsuarioDto>> listUsers(){
         var users = userService.listaUsuarios();
         return ResponseEntity.ok(users);
-    }
+    }*/
 }

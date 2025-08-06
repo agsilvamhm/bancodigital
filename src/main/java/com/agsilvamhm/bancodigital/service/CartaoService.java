@@ -9,7 +9,7 @@ import com.agsilvamhm.bancodigital.controller.exception.RegraNegocioException;
 import com.agsilvamhm.bancodigital.model.*;
 import com.agsilvamhm.bancodigital.model.dto.EmitirCartaoRequest;
 import com.agsilvamhm.bancodigital.model.dto.PagamentoCartaoRequest;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class CartaoService {
         this.movimentacaoDao = movimentacaoDao;
     }
 
-    @Transactional
+    //@Transactional
     public Cartao emitirNovoCartao(EmitirCartaoRequest request) {
         Objects.requireNonNull(request, "A requisição para emitir cartão não pode ser nula.");
 
@@ -85,7 +85,7 @@ public class CartaoService {
         return cartaoDao.buscarPorContaId(contaId);
     }
 
-    @Transactional
+   // @Transactional
     public void realizarPagamento(Integer cartaoId, PagamentoCartaoRequest request) {
         Cartao cartao = buscarPorId(cartaoId);
 
@@ -140,14 +140,14 @@ public class CartaoService {
         }
     }
 
-    @Transactional
+    //@Transactional
     public void alterarStatus(Integer cartaoId, boolean novoStatus) {
         Cartao cartao = buscarPorId(cartaoId);
         cartaoDao.atualizarStatus(cartao.getId(), novoStatus);
         logger.info("Status do cartão ID {} alterado para {}.", cartaoId, novoStatus ? "ATIVO" : "INATIVO");
     }
 
-    @Transactional
+   // @Transactional
     public void atualizarLimiteCredito(Integer cartaoId, BigDecimal novoLimite) {
         Cartao cartao = buscarPorId(cartaoId);
         if (!TipoCartao.CREDITO.equals(cartao.getTipoCartao())) {
@@ -161,7 +161,7 @@ public class CartaoService {
         logger.info("Limite de crédito do cartão ID {} alterado para R$ {}.", cartaoId, novoLimite);
     }
 
-    @Transactional
+   // @Transactional
     public void alterarSenha(Integer cartaoId, String novaSenha) {
         Cartao cartao = buscarPorId(cartaoId);
         String novaSenhaHasheada = novaSenha; // Placeholder
@@ -169,7 +169,7 @@ public class CartaoService {
         logger.info("Senha do cartão ID {} alterada com sucesso.", cartaoId);
     }
 
-    @Transactional
+   // @Transactional
     public void pagarFatura(Integer cartaoId, BigDecimal valorPagamento) {
         Cartao cartao = buscarPorId(cartaoId);
         if (!TipoCartao.CREDITO.equals(cartao.getTipoCartao())) {
@@ -199,7 +199,7 @@ public class CartaoService {
         logger.info("Pagamento de fatura de R$ {} para o cartão ID {} realizado com sucesso.", valorPagamento, cartaoId);
     }
 
-    @Transactional
+   // @Transactional
     public void atualizarLimiteDiarioDebito(Integer cartaoId, BigDecimal novoLimite) {
         Cartao cartao = buscarPorId(cartaoId);
         if (!TipoCartao.DEBITO.equals(cartao.getTipoCartao())) {

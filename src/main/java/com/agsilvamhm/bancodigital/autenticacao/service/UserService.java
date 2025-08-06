@@ -6,7 +6,7 @@ import com.agsilvamhm.bancodigital.autenticacao.model.dto.CreateUserDto;
 import com.agsilvamhm.bancodigital.autenticacao.model.dto.UsuarioDto;
 import com.agsilvamhm.bancodigital.autenticacao.repository.RoleRepository;
 import com.agsilvamhm.bancodigital.autenticacao.repository.UserRepository;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-
+/*
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -34,8 +34,8 @@ public class UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-
-    @Transactional
+/*
+   // @Transactional
     public User create(CreateUserDto dto, JwtAuthenticationToken token) {
         var userLogado = userRepository.findById(UUID.fromString(token.getName()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não encontrado"));
@@ -76,5 +76,5 @@ public class UserService {
                 })
                 .collect(Collectors.toList());
         return usuariosDto;
-    }
+    }*/
 }

@@ -8,7 +8,7 @@ import com.agsilvamhm.bancodigital.controller.exception.RegraNegocioException;
 import com.agsilvamhm.bancodigital.controller.exception.RepositorioException;
 import com.agsilvamhm.bancodigital.model.*;
 import com.agsilvamhm.bancodigital.model.dto.*;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class ContaService {
         this.movimentacaoDao = movimentacaoDao;
     }
 
-    @Transactional
+  //  @Transactional
     public Conta criarConta(CriarContaRequest request) {
         Objects.requireNonNull(request, "A requisição para criar conta não pode ser nula.");
         validarNovaConta(request);
@@ -90,7 +90,7 @@ public class ContaService {
         return contaDao.listarContasPoupanca();
     }
 
-    @Transactional
+  //  @Transactional
     public void atualizarConta(Conta conta) {
         contaDao.atualizar(conta);
     }
@@ -113,7 +113,7 @@ public class ContaService {
         return conta.getSaldo();
     }
 
-    @Transactional
+  //  @Transactional
     public Movimentacao realizarTransferencia(Long idContaOrigem, TransferenciaRequestDTO request) {
         if (request.valor().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RegraNegocioException("O valor da transferência deve ser positivo.");
@@ -145,7 +145,7 @@ public class ContaService {
         return movimentacao;
     }
 
-    @Transactional
+ //   @Transactional
     public Movimentacao realizarDeposito(Long idConta, DepositoRequestDTO request) {
         Conta conta = buscarPorId(idConta);
         BigDecimal novoSaldo = conta.getSaldo().add(request.valor());
@@ -163,7 +163,7 @@ public class ContaService {
         return movimentacao;
     }
 
-    @Transactional
+  //  @Transactional
     public Movimentacao realizarSaque(Long idConta, OperacaoContaDTO request) {
         Conta conta = buscarPorId(idConta);
         if (conta.getSaldo().compareTo(request.valor()) < 0) {
@@ -184,7 +184,7 @@ public class ContaService {
         return movimentacao;
     }
 
-    @Transactional
+ //   @Transactional
     public Movimentacao realizarPix(Long idContaOrigem, PixRequestDTO request) {
         Conta contaOrigem = buscarPorId(idContaOrigem);
         Cliente clienteDestino = clienteDao.buscarPorCpf(request.chavePix())
@@ -227,7 +227,7 @@ public class ContaService {
         return movimentacoes;
     }
 
-    @Transactional
+  //  @Transactional
     public Movimentacao aplicarTaxaManutencao(Long idConta) {
         logger.info("Iniciando aplicação de taxa de manutenção para a conta ID: {}", idConta);
         Conta conta = this.buscarPorId(idConta);
@@ -263,7 +263,7 @@ public class ContaService {
         return movimentacaoTaxa;
     }
 
-    @Transactional
+ //   @Transactional
     public Movimentacao aplicarRendimentos(Long idConta) {
         logger.info("Iniciando aplicação de rendimentos para a conta ID: {}", idConta);
         Conta conta = this.buscarPorId(idConta);
