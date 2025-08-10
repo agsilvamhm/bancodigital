@@ -17,8 +17,8 @@ O sistema foi projetado para cobrir as seguintes áreas:
 classDiagram
   direction LR
 
-  class User {
-    -UUID userId
+  class Usuario {
+    -UUID usuario_id
     -String username
     -String password
     -UserStatus status
@@ -456,3 +456,8 @@ graph TD
     X --> B_End;
     Z --> B_End;
 ```
+
+## Referencias
+
+### Autenticação com swing e JWT
+https://www.youtube.com/watch?v=nDst-CRKt_k

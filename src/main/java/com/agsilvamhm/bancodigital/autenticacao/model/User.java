@@ -1,7 +1,6 @@
 package com.agsilvamhm.bancodigital.autenticacao.model;
 
 import com.agsilvamhm.bancodigital.autenticacao.model.dto.LoginRequest;
-//import jakarta.persistence.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Set;
